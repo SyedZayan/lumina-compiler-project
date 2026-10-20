@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-slate-50 text-slate-800">
+<html lang="en" class="h-full bg-slate-100 text-slate-800">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Lumina Compiler Studio - Compiler Construction Project</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <style>
@@ -10,220 +10,245 @@
     body { font-family: 'Plus Jakarta Sans', sans-serif; }
     .font-mono { font-family: 'JetBrains Mono', monospace; }
     
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    /* Clean custom scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    
+    /* Smooth horizontal touch scroll */
+    .touch-scroll {
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+    }
   </style>
 </head>
-<body class="h-full flex flex-col bg-slate-100 text-slate-800 antialiased">
+<body class="min-h-full flex flex-col bg-slate-100 text-slate-800 antialiased">
 
-  <!-- Header -->
-  <header class="bg-white border-b border-slate-200 px-5 py-3 flex flex-wrap items-center justify-between gap-4 shrink-0 shadow-sm">
-    <div class="flex items-center gap-3">
-      <div class="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-lg flex items-center justify-center shadow-md shadow-blue-500/20">
-        L
-      </div>
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-base font-bold text-slate-900 tracking-tight">Lumina Compiler Studio</h1>
-          <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-semibold">Term Project</span>
-          <span class="text-xs bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-medium">Lab 02 Spec</span>
+  <!-- Top Header -->
+  <header class="bg-white border-b border-slate-200 px-3.5 sm:px-5 py-2.5 sm:py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0 shadow-sm">
+    <div class="flex items-center justify-between w-full sm:w-auto">
+      <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-600 text-white font-bold text-base sm:text-lg flex items-center justify-center shadow-md shadow-blue-500/20 shrink-0">
+          L
         </div>
-        <p class="text-xs text-slate-500">Compiler Construction &bull; 5-Stage Compilation Pipeline &bull; Interactive Virtual Machine</p>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-bold text-slate-900 tracking-tight leading-tight">Lumina Compiler</h1>
+            <span class="text-[10px] sm:text-xs bg-blue-50 text-blue-700 border border-blue-200 px-1.5 py-0.5 rounded-full font-semibold">Term Project</span>
+          </div>
+          <p class="text-[11px] text-slate-500 hidden sm:block">Compiler Construction &bull; 5-Stage Compilation Pipeline &bull; Lab 02 Spec</p>
+        </div>
       </div>
+
+      <!-- Grammar button on mobile right -->
+      <button id="btn-grammar-modal-mobile" class="sm:hidden p-2 rounded-lg bg-slate-100 text-slate-700 border border-slate-200 hover:bg-slate-200 transition" title="Language Grammar">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+      </button>
     </div>
 
-    <!-- Actions & Preset Selector -->
-    <div class="flex items-center gap-3 flex-wrap">
-      <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm">
-        <label for="example-select" class="text-xs font-semibold text-slate-600">Sample Code:</label>
-        <select id="example-select" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none cursor-pointer pr-1">
+    <!-- Actions & Controls -->
+    <div class="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-between sm:justify-end">
+      <!-- Preset dropdown -->
+      <div class="flex-1 sm:flex-initial flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 sm:px-3 py-1.5 shadow-sm min-w-0">
+        <label for="example-select" class="text-[11px] sm:text-xs font-semibold text-slate-500 shrink-0">Sample:</label>
+        <select id="example-select" class="bg-transparent text-[11px] sm:text-xs text-slate-800 font-medium focus:outline-none cursor-pointer truncate w-full sm:w-44">
           <option value="lab02">1. Official Lab 02 Code (Score Check)</option>
           <option value="loop">2. While Loop & Arithmetic (Count 1 to 5)</option>
           <option value="ifelse">3. If / Else Decision (Grade Check)</option>
           <option value="strings">4. String Concatenation & Output</option>
-          <option value="err_type">5. Test Error: Type Mismatch (Int := Text)</option>
-          <option value="err_undeclared">6. Test Error: Undeclared Variable</option>
-          <option value="err_syntax">7. Test Error: Missing Syntax (No Expression)</option>
+          <option value="err_type">5. Test Error: Type Mismatch</option>
+          <option value="err_undeclared">6. Test Error: Undeclared Var</option>
+          <option value="err_syntax">7. Test Error: Missing Syntax</option>
         </select>
       </div>
 
-      <button id="btn-compile" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition">
-        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-        <span>Run Compiler</span>
+      <!-- Run Button -->
+      <button id="btn-compile" class="flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition shrink-0">
+        <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span>Run</span>
       </button>
 
-      <button id="btn-grammar-modal" class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-sm transition">
+      <!-- Grammar Button on desktop -->
+      <button id="btn-grammar-modal" class="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-sm transition shrink-0">
         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-        <span>View Language Grammar</span>
+        <span>Grammar</span>
       </button>
     </div>
   </header>
 
-  <!-- Visual Pipeline Stepper Bar -->
-  <div class="bg-white border-b border-slate-200 px-5 py-2.5 shrink-0 flex items-center justify-between flex-wrap gap-3">
-    <div class="flex items-center gap-1 sm:gap-2 text-xs overflow-x-auto w-full md:w-auto">
-      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Pipeline:</span>
+  <!-- Mobile Segmented View Switcher (< lg screens only) -->
+  <div class="lg:hidden bg-slate-200/80 p-1.5 border-b border-slate-300 shrink-0 flex gap-1 text-xs font-semibold">
+    <button id="mobile-tab-editor" class="flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm text-center transition flex items-center justify-center gap-1.5">
+      <span>📝 Code Editor</span>
+    </button>
+    <button id="mobile-tab-results" class="flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 text-center transition flex items-center justify-center gap-1.5">
+      <span>⚡ Compiler Stages</span>
+      <span id="mobile-result-badge" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+    </button>
+  </div>
+
+  <!-- Visual Pipeline Stepper Bar (Horizontally scrollable on mobile) -->
+  <div class="bg-white border-b border-slate-200 px-3 sm:px-5 py-2 shrink-0 flex items-center justify-between gap-3 overflow-hidden">
+    <div class="flex items-center gap-1 sm:gap-2 text-xs overflow-x-auto touch-scroll py-0.5 w-full">
+      <span class="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Stage:</span>
       
-      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="1" id="step-1-btn">
-        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">1</span>
-        <span>Lexer (Tokens)</span>
+      <button class="step-btn px-2.5 sm:px-3 py-1 rounded-lg font-semibold flex items-center gap-1 sm:gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0 text-xs" data-stage="1" id="step-1-btn">
+        <span class="step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">1</span>
+        <span>Lexer</span>
       </button>
       
       <span class="text-slate-300 shrink-0">&rarr;</span>
       
-      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="2" id="step-2-btn">
-        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">2</span>
-        <span>Parser (AST)</span>
+      <button class="step-btn px-2.5 sm:px-3 py-1 rounded-lg font-semibold flex items-center gap-1 sm:gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0 text-xs" data-stage="2" id="step-2-btn">
+        <span class="step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">2</span>
+        <span>Parser</span>
       </button>
       
       <span class="text-slate-300 shrink-0">&rarr;</span>
       
-      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="3" id="step-3-btn">
-        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">3</span>
-        <span>Semantic (Symbols)</span>
+      <button class="step-btn px-2.5 sm:px-3 py-1 rounded-lg font-semibold flex items-center gap-1 sm:gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0 text-xs" data-stage="3" id="step-3-btn">
+        <span class="step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">3</span>
+        <span>Semantic</span>
       </button>
       
       <span class="text-slate-300 shrink-0">&rarr;</span>
       
-      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="4" id="step-4-btn">
-        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">4</span>
-        <span>Intermediate (TAC)</span>
+      <button class="step-btn px-2.5 sm:px-3 py-1 rounded-lg font-semibold flex items-center gap-1 sm:gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0 text-xs" data-stage="4" id="step-4-btn">
+        <span class="step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">4</span>
+        <span>TAC</span>
       </button>
       
       <span class="text-slate-300 shrink-0">&rarr;</span>
       
-      <button class="step-btn active px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 transition shrink-0" data-stage="5" id="step-5-btn">
-        <span class="step-num w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">5</span>
-        <span>Program Output</span>
+      <button class="step-btn active px-2.5 sm:px-3 py-1 rounded-lg font-semibold flex items-center gap-1 sm:gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 transition shrink-0 text-xs" data-stage="5" id="step-5-btn">
+        <span class="step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">5</span>
+        <span>Output</span>
       </button>
     </div>
 
-    <!-- Global Status Tag -->
-    <div id="status-tag" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+    <!-- Status indicator (hidden on very small screens, displayed in stepper) -->
+    <div id="status-tag" class="hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
       <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
       <span id="status-tag-text">Compiled Successfully</span>
     </div>
   </div>
 
-  <!-- Main Work Area: Left Editor, Right Stage Inspector -->
-  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-slate-100 gap-0">
+  <!-- Main Work Area: 2-Column on Desktop (lg), Toggle on Mobile (< lg) -->
+  <main class="flex-1 flex flex-col lg:grid lg:grid-cols-12 overflow-hidden bg-slate-100">
     
-    <!-- LEFT PANE: SOURCE CODE EDITOR (5 Columns) -->
-    <section class="lg:col-span-5 flex flex-col bg-white border-r border-slate-200 overflow-hidden shadow-sm">
+    <!-- LEFT PANE: SOURCE CODE EDITOR (5 Cols on desktop) -->
+    <section id="panel-editor" class="flex-1 lg:flex lg:col-span-5 flex-col bg-white border-r border-slate-200 overflow-hidden shadow-sm">
       <!-- Editor Header -->
-      <div class="px-4 py-2.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+      <div class="px-3.5 sm:px-4 py-2 border-b border-slate-200 bg-slate-50 flex items-center justify-between shrink-0">
+        <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Source Code (Lumina)</span>
         <div class="flex items-center gap-2">
-          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Source Code (Lumina Lang)</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <button id="btn-clear" class="text-xs text-slate-500 hover:text-slate-700 px-2 py-1 rounded hover:bg-slate-200 transition">Clear</button>
-          <button id="btn-copy" class="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-50 transition">Copy Code</button>
+          <button id="btn-clear" class="text-xs text-slate-500 hover:text-slate-700 px-2 py-0.5 rounded hover:bg-slate-200 transition">Clear</button>
+          <button id="btn-copy" class="text-xs text-blue-600 hover:text-blue-800 font-semibold px-2 py-0.5 rounded hover:bg-blue-50 transition">Copy</button>
         </div>
       </div>
 
-      <!-- Quick Syntax Buttons for Quick Testing -->
-      <div class="px-3 py-2 bg-slate-100/70 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto text-xs shrink-0">
-        <span class="text-slate-400 font-semibold text-[11px] mr-1 shrink-0">Click to add:</span>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 transition shrink-0" data-insert="Bindint ">Bindint</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 transition shrink-0" data-insert="Bindstrng ">Bindstrng</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 transition shrink-0" data-insert="Bindbool ">Bindbool</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-emerald-700 font-mono text-[11px] hover:border-emerald-400 transition shrink-0" data-insert=" := ">:=</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-amber-700 font-mono text-[11px] hover:border-amber-400 transition shrink-0" data-insert="Turnout ">Turnout</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-indigo-700 font-mono text-[11px] hover:border-indigo-400 transition shrink-0" data-insert="examine ">examine</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-indigo-700 font-mono text-[11px] hover:border-indigo-400 transition shrink-0" data-insert="otherwise ">otherwise</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-purple-700 font-mono text-[11px] hover:border-purple-400 transition shrink-0" data-insert="noose ">noose</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-rose-700 font-mono text-[11px] hover:border-rose-400 transition shrink-0" data-insert="halt">halt</button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 transition shrink-0" data-insert=" ++> ">++></button>
-        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 transition shrink-0" data-insert=" >> ">>></button>
+      <!-- Quick Syntax Chips (Horizontal Scrollable) -->
+      <div class="px-2.5 py-1.5 bg-slate-100/70 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto touch-scroll text-xs shrink-0 select-none">
+        <span class="text-slate-400 font-semibold text-[10px] sm:text-[11px] mr-1 shrink-0">Insert:</span>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 active:bg-blue-50 transition shrink-0" data-insert="Bindint ">Bindint</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 active:bg-blue-50 transition shrink-0" data-insert="Bindstrng ">Bindstrng</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 active:bg-blue-50 transition shrink-0" data-insert="Bindbool ">Bindbool</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-emerald-700 font-mono text-[11px] hover:border-emerald-400 active:bg-emerald-50 transition shrink-0" data-insert=" := ">:=</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-amber-700 font-mono text-[11px] hover:border-amber-400 active:bg-amber-50 transition shrink-0" data-insert="Turnout ">Turnout</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-indigo-700 font-mono text-[11px] hover:border-indigo-400 active:bg-indigo-50 transition shrink-0" data-insert="examine ">examine</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-indigo-700 font-mono text-[11px] hover:border-indigo-400 active:bg-indigo-50 transition shrink-0" data-insert="otherwise ">otherwise</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-purple-700 font-mono text-[11px] hover:border-purple-400 active:bg-purple-50 transition shrink-0" data-insert="noose ">noose</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-rose-700 font-mono text-[11px] hover:border-rose-400 active:bg-rose-50 transition shrink-0" data-insert="halt">halt</button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 active:bg-blue-50 transition shrink-0" data-insert=" ++> ">++></button>
+        <button class="syntax-chip px-2 py-1 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 active:bg-blue-50 transition shrink-0" data-insert=" >> ">>></button>
       </div>
 
       <!-- Editor Textarea Area with Line Numbers -->
-      <div class="flex-1 flex overflow-hidden font-mono text-[13px] bg-slate-900 text-slate-100">
-        <div id="editor-lines" class="w-10 bg-slate-950 text-slate-500 py-3 text-right pr-2 select-none border-r border-slate-800 shrink-0 leading-relaxed font-mono text-xs">
+      <div class="flex-1 flex overflow-hidden font-mono text-[13px] sm:text-xs bg-slate-900 text-slate-100 min-h-[220px]">
+        <div id="editor-lines" class="w-9 sm:w-10 bg-slate-950 text-slate-500 py-3 text-right pr-2 select-none border-r border-slate-800 shrink-0 leading-relaxed font-mono text-xs">
           1
         </div>
-        <textarea id="source-editor" spellcheck="false" class="flex-1 bg-transparent text-slate-100 p-3 leading-relaxed resize-none focus:outline-none focus:ring-0 selection:bg-blue-600 selection:text-white font-mono" placeholder="Write Lumina Lang code here..."></textarea>
+        <textarea id="source-editor" spellcheck="false" class="flex-1 bg-transparent text-slate-100 p-3 leading-relaxed resize-none focus:outline-none focus:ring-0 selection:bg-blue-600 selection:text-white font-mono text-[13px] sm:text-xs" placeholder="Write Lumina Lang code here..."></textarea>
       </div>
 
       <!-- Compiler Messages Box -->
       <div class="border-t border-slate-200 bg-white p-3 shrink-0">
-        <div class="flex items-center justify-between mb-1.5">
+        <div class="flex items-center justify-between mb-1">
           <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Compiler Messages</span>
-          <span id="msg-badge" class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">0 Errors</span>
+          <span id="msg-badge" class="text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">0 Errors</span>
         </div>
-        <div id="compiler-msg-content" class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-mono min-h-[55px] max-h-[85px] overflow-y-auto">
+        <div id="compiler-msg-content" class="bg-slate-50 border border-slate-200 rounded-lg p-2 text-xs font-mono min-h-[50px] max-h-[75px] overflow-y-auto">
           <div class="text-emerald-700 font-medium">✓ All checks passed. Code compiled cleanly.</div>
         </div>
       </div>
     </section>
 
-    <!-- RIGHT PANE: STAGE RESULTS VIEWER (7 Columns) -->
-    <section class="lg:col-span-7 flex flex-col bg-white overflow-hidden">
+    <!-- RIGHT PANE: STAGE RESULTS VIEWER (7 Cols on desktop) -->
+    <section id="panel-results" class="hidden lg:flex lg:col-span-7 flex-col bg-white overflow-hidden flex-1">
       
-      <!-- Stage Header with Title and Plain-English Explanation -->
-      <div class="px-5 py-3 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between flex-wrap gap-2">
+      <!-- Stage Header -->
+      <div class="px-4 sm:px-5 py-2.5 sm:py-3 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between flex-wrap gap-2 shrink-0">
         <div>
-          <h2 id="stage-title" class="text-sm font-bold text-slate-900">Stage 5: Final Output & Virtual Machine</h2>
-          <p id="stage-desc" class="text-xs text-slate-500">Runs the instructions inside the Lumina VM and prints standard output.</p>
+          <h2 id="stage-title" class="text-xs sm:text-sm font-bold text-slate-900 leading-tight">Stage 5: Final Output & Virtual Machine</h2>
+          <p id="stage-desc" class="text-[11px] text-slate-500">Runs instructions inside the Lumina VM and prints standard output.</p>
         </div>
-        <div id="stage-stat-badge" class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-200 text-slate-700 font-mono">
+        <div id="stage-stat-badge" class="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-mono">
           Ready
         </div>
       </div>
 
-      <!-- Stage Views Container -->
-      <div class="flex-1 overflow-y-auto p-5">
+      <!-- Stage Views Container (Scrollable) -->
+      <div class="flex-1 overflow-y-auto p-3.5 sm:p-5 touch-scroll">
 
         <!-- VIEW 1: LEXICAL TOKENS -->
-        <div id="view-stage-1" class="hidden space-y-4">
+        <div id="view-stage-1" class="hidden space-y-3 sm:space-y-4">
           <!-- Summary Cards -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl">
-              <div class="text-xs text-blue-600 font-medium">Keywords</div>
-              <div id="stat-kw" class="text-xl font-bold text-blue-900 font-mono">0</div>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
+            <div class="p-2.5 sm:p-3 bg-blue-50 border border-blue-100 rounded-xl">
+              <div class="text-[11px] text-blue-600 font-medium">Keywords</div>
+              <div id="stat-kw" class="text-lg sm:text-xl font-bold text-blue-900 font-mono">0</div>
             </div>
-            <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
-              <div class="text-xs text-amber-600 font-medium">Operators</div>
-              <div id="stat-op" class="text-xl font-bold text-amber-900 font-mono">0</div>
+            <div class="p-2.5 sm:p-3 bg-amber-50 border border-amber-100 rounded-xl">
+              <div class="text-[11px] text-amber-600 font-medium">Operators</div>
+              <div id="stat-op" class="text-lg sm:text-xl font-bold text-amber-900 font-mono">0</div>
             </div>
-            <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl">
-              <div class="text-xs text-purple-600 font-medium">Variables (Identifiers)</div>
-              <div id="stat-id" class="text-xl font-bold text-purple-900 font-mono">0</div>
+            <div class="p-2.5 sm:p-3 bg-purple-50 border border-purple-100 rounded-xl">
+              <div class="text-[11px] text-purple-600 font-medium">Identifiers</div>
+              <div id="stat-id" class="text-lg sm:text-xl font-bold text-purple-900 font-mono">0</div>
             </div>
-            <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
-              <div class="text-xs text-emerald-600 font-medium">Numbers & Strings</div>
-              <div id="stat-lit" class="text-xl font-bold text-emerald-900 font-mono">0</div>
+            <div class="p-2.5 sm:p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <div class="text-[11px] text-emerald-600 font-medium">Literals</div>
+              <div id="stat-lit" class="text-lg sm:text-xl font-bold text-emerald-900 font-mono">0</div>
             </div>
           </div>
 
-          <!-- Token Stream (Easy visual flow) -->
+          <!-- Token Stream -->
           <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-            <div class="text-xs font-bold text-slate-700 mb-2">Token Stream (Visual Order):</div>
-            <div id="token-chips" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto font-mono text-xs">
+            <div class="text-xs font-bold text-slate-700 mb-1.5">Token Stream (Visual Order):</div>
+            <div id="token-chips" class="flex flex-wrap gap-1 max-h-24 sm:max-h-28 overflow-y-auto touch-scroll font-mono text-[11px]">
               <!-- Tokens chips -->
             </div>
           </div>
 
           <!-- Tokens Table -->
           <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-            <div class="bg-white px-4 py-2 border-b border-slate-200 flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Token Classification Table</span>
-              <input id="token-search" type="text" placeholder="Search tokens..." class="text-xs border border-slate-200 rounded-md px-2.5 py-1 focus:outline-none focus:border-blue-500 w-40">
+            <div class="bg-white px-3 sm:px-4 py-2 border-b border-slate-200 flex items-center justify-between gap-2">
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Token Table</span>
+              <input id="token-search" type="text" placeholder="Filter..." class="text-xs border border-slate-200 rounded-md px-2 py-0.5 focus:outline-none focus:border-blue-500 w-28 sm:w-36">
             </div>
-            <div class="max-h-80 overflow-y-auto">
-              <table class="w-full text-left text-xs">
+            <div class="max-h-72 sm:max-h-80 overflow-auto touch-scroll">
+              <table class="w-full text-left text-xs min-w-[420px]">
                 <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 sticky top-0">
                   <tr>
-                    <th class="py-2.5 px-3">#</th>
-                    <th class="py-2.5 px-3">Position</th>
-                    <th class="py-2.5 px-3">Token Type</th>
-                    <th class="py-2.5 px-3">Text (Lexeme)</th>
-                    <th class="py-2.5 px-3">Meaning</th>
+                    <th class="py-2 px-2.5">#</th>
+                    <th class="py-2 px-2.5">Pos</th>
+                    <th class="py-2 px-2.5">Type</th>
+                    <th class="py-2 px-2.5">Lexeme</th>
+                    <th class="py-2 px-2.5">Meaning</th>
                   </tr>
                 </thead>
-                <tbody id="token-table" class="divide-y divide-slate-100 font-mono">
+                <tbody id="token-table" class="divide-y divide-slate-100 font-mono text-[11px] sm:text-xs">
                   <!-- Token rows -->
                 </tbody>
               </table>
@@ -232,79 +257,81 @@
         </div>
 
         <!-- VIEW 2: SYNTAX PARSE TREE (AST) -->
-        <div id="view-stage-2" class="hidden space-y-4">
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
-            <span class="text-xs font-semibold text-slate-700">Display Format:</span>
-            <div class="flex items-center gap-2">
-              <button id="btn-tree-visual" class="px-3 py-1 rounded bg-blue-600 text-white font-medium text-xs">Tree View</button>
-              <button id="btn-tree-json" class="px-3 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100">JSON View</button>
+        <div id="view-stage-2" class="hidden space-y-3 sm:space-y-4">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700">Format:</span>
+            <div class="flex items-center gap-1.5">
+              <button id="btn-tree-visual" class="px-2.5 py-1 rounded bg-blue-600 text-white font-medium text-xs">Tree View</button>
+              <button id="btn-tree-json" class="px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100">JSON</button>
             </div>
           </div>
 
           <!-- Visual Tree -->
-          <div id="tree-container" class="bg-slate-900 text-slate-100 border border-slate-800 rounded-xl p-4 font-mono text-xs max-h-[420px] overflow-auto space-y-1">
+          <div id="tree-container" class="bg-slate-900 text-slate-100 border border-slate-800 rounded-xl p-3 sm:p-4 font-mono text-[11px] sm:text-xs max-h-[380px] sm:max-h-[420px] overflow-auto touch-scroll space-y-1">
             <!-- Tree hierarchy -->
           </div>
 
           <!-- JSON Tree -->
-          <div id="json-container" class="hidden bg-slate-900 text-cyan-300 border border-slate-800 rounded-xl p-4 font-mono text-xs max-h-[420px] overflow-auto">
+          <div id="json-container" class="hidden bg-slate-900 text-cyan-300 border border-slate-800 rounded-xl p-3 sm:p-4 font-mono text-[11px] sm:text-xs max-h-[380px] sm:max-h-[420px] overflow-auto touch-scroll">
             <pre id="json-pre"></pre>
           </div>
         </div>
 
         <!-- VIEW 3: SEMANTIC ANALYSIS & SYMBOL TABLE -->
-        <div id="view-stage-3" class="hidden space-y-4">
+        <div id="view-stage-3" class="hidden space-y-3 sm:space-y-4">
           <!-- Safety Checklist -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div id="check-declared-card" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+            <div id="check-declared-card" class="p-2.5 sm:p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2">
               <span id="check-declared-icon" class="text-emerald-600 font-bold text-sm">✓</span>
               <div>
-                <div class="text-xs font-bold text-slate-800">Variables Declared Before Use</div>
-                <div id="check-declared-desc" class="text-[11px] text-slate-500">All referenced variables exist in scope.</div>
+                <div class="text-xs font-bold text-slate-800">Declared Before Use</div>
+                <div id="check-declared-desc" class="text-[11px] text-slate-500">All variables exist in scope.</div>
               </div>
             </div>
-            <div id="check-types-card" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5">
+            <div id="check-types-card" class="p-2.5 sm:p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2">
               <span id="check-types-icon" class="text-emerald-600 font-bold text-sm">✓</span>
               <div>
-                <div class="text-xs font-bold text-slate-800">Type Compatibility Checked</div>
-                <div id="check-types-desc" class="text-[11px] text-slate-500">Values match variable types (INT, STRING, BOOL).</div>
+                <div class="text-xs font-bold text-slate-800">Type Compatibility</div>
+                <div id="check-types-desc" class="text-[11px] text-slate-500">Matches INT, STRING, BOOL types.</div>
               </div>
             </div>
           </div>
 
           <!-- Symbol Table -->
           <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-            <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 font-bold text-xs text-slate-700">
+            <div class="bg-slate-50 px-3 sm:px-4 py-2 border-b border-slate-200 font-bold text-xs text-slate-700">
               Symbol Table (Variable Registry)
             </div>
-            <table class="w-full text-left text-xs font-mono">
-              <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
-                <tr>
-                  <th class="py-2 px-3">Variable Name</th>
-                  <th class="py-2 px-3">Type</th>
-                  <th class="py-2 px-3">Scope</th>
-                  <th class="py-2 px-3">Declared At</th>
-                  <th class="py-2 px-3">Initial Value</th>
-                </tr>
-              </thead>
-              <tbody id="symbol-table" class="divide-y divide-slate-100 bg-white">
-                <!-- Symbols injected -->
-              </tbody>
-            </table>
+            <div class="overflow-x-auto touch-scroll">
+              <table class="w-full text-left text-xs font-mono min-w-[380px]">
+                <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                  <tr>
+                    <th class="py-2 px-2.5">Name</th>
+                    <th class="py-2 px-2.5">Type</th>
+                    <th class="py-2 px-2.5">Scope</th>
+                    <th class="py-2 px-2.5">Line</th>
+                    <th class="py-2 px-2.5">Value</th>
+                  </tr>
+                </thead>
+                <tbody id="symbol-table" class="divide-y divide-slate-100 bg-white text-[11px] sm:text-xs">
+                  <!-- Symbols -->
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
         <!-- VIEW 4: INTERMEDIATE CODE GENERATION (TAC) -->
-        <div id="view-stage-4" class="hidden space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        <div id="view-stage-4" class="hidden space-y-3 sm:space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4">
             
-            <!-- Three Address Code (TAC) -->
+            <!-- Three Address Code -->
             <div class="md:col-span-5 flex flex-col">
-              <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+              <div class="text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
                 <span>Three-Address Code (TAC):</span>
-                <button id="btn-copy-tac" class="text-blue-600 hover:text-blue-800 font-medium text-[11px]">Copy TAC</button>
+                <button id="btn-copy-tac" class="text-blue-600 hover:text-blue-800 font-semibold text-[11px]">Copy TAC</button>
               </div>
-              <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-xs text-cyan-300 max-h-[380px] overflow-y-auto flex-1">
+              <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-[11px] sm:text-xs text-cyan-300 max-h-[300px] sm:max-h-[380px] overflow-y-auto touch-scroll flex-1">
                 <ol id="tac-list" class="space-y-1 list-decimal list-inside text-slate-200">
                   <!-- TAC items -->
                 </ol>
@@ -313,21 +340,21 @@
 
             <!-- Quadruples Table -->
             <div class="md:col-span-7 flex flex-col">
-              <div class="text-xs font-bold text-slate-700 mb-1.5">
-                Quadruples (Operator, Arg1, Arg2, Result):
+              <div class="text-xs font-bold text-slate-700 mb-1">
+                Quadruples (Op, Arg1, Arg2, Result):
               </div>
-              <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm max-h-[380px] overflow-y-auto">
-                <table class="w-full text-left text-xs font-mono">
+              <div class="border border-slate-200 rounded-xl overflow-auto touch-scroll shadow-sm max-h-[300px] sm:max-h-[380px]">
+                <table class="w-full text-left text-xs font-mono min-w-[340px]">
                   <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200 sticky top-0">
                     <tr>
-                      <th class="py-2 px-2.5">#</th>
-                      <th class="py-2 px-2.5">Op</th>
-                      <th class="py-2 px-2.5">Arg 1</th>
-                      <th class="py-2 px-2.5">Arg 2</th>
-                      <th class="py-2 px-2.5">Result</th>
+                      <th class="py-1.5 px-2">#</th>
+                      <th class="py-1.5 px-2">Op</th>
+                      <th class="py-1.5 px-2">Arg 1</th>
+                      <th class="py-1.5 px-2">Arg 2</th>
+                      <th class="py-1.5 px-2">Result</th>
                     </tr>
                   </thead>
-                  <tbody id="quad-table" class="divide-y divide-slate-100 bg-white">
+                  <tbody id="quad-table" class="divide-y divide-slate-100 bg-white text-[11px] sm:text-xs">
                     <!-- Quadruples -->
                   </tbody>
                 </table>
@@ -338,27 +365,27 @@
         </div>
 
         <!-- VIEW 5: PROGRAM OUTPUT & VM -->
-        <div id="view-stage-5" class="space-y-4">
-          <!-- Terminal -->
+        <div id="view-stage-5" class="space-y-3 sm:space-y-4">
+          <!-- Terminal Window -->
           <div class="border border-slate-300 rounded-xl overflow-hidden shadow-md bg-slate-950 text-slate-100">
-            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
-                <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
-                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
-                <span class="text-xs text-slate-400 font-mono ml-2 font-medium">Program Console Output</span>
+            <div class="bg-slate-900 px-3 sm:px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+              <div class="flex items-center gap-1.5 sm:gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                <span class="text-[11px] sm:text-xs text-slate-400 font-mono ml-1 font-medium truncate">Terminal Console</span>
               </div>
-              <span id="vm-halt-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700">
+              <span id="vm-halt-badge" class="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700">
                 STATUS: HALTED
               </span>
             </div>
-            <div id="terminal-screen" class="p-4 font-mono text-xs min-h-[160px] max-h-[220px] overflow-y-auto space-y-1">
-              <!-- Output lines or error banner -->
+            <div id="terminal-screen" class="p-3 sm:p-4 font-mono text-[11px] sm:text-xs min-h-[150px] max-h-[220px] overflow-y-auto touch-scroll space-y-1">
+              <!-- Output lines or error message -->
             </div>
           </div>
 
-          <!-- Memory State -->
-          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+          <!-- Memory Inspector -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 sm:p-4">
             <div class="text-xs font-bold text-slate-700 mb-2">Final Variable Values in Memory:</div>
             <div id="memory-cards" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
               <!-- Memory items -->
@@ -371,21 +398,21 @@
 
   </main>
 
-  <!-- Grammar Modal -->
-  <div id="grammar-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
-      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+  <!-- Grammar Modal (Fully Responsive on Mobile & Desktop) -->
+  <div id="grammar-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-xl w-full max-h-[90vh] flex flex-col overflow-hidden">
+      <div class="px-4 sm:px-5 py-3 border-b border-slate-200 flex items-center justify-between bg-slate-50 shrink-0">
         <div>
-          <h3 class="text-sm font-bold text-slate-900">Lumina Language Grammar (EBNF)</h3>
-          <p class="text-xs text-slate-500">Formal Context-Free Grammar and Operator Precedence Reference</p>
+          <h3 class="text-sm font-bold text-slate-900">Lumina Grammar (EBNF)</h3>
+          <p class="text-[11px] text-slate-500">Formal language grammar & operator reference.</p>
         </div>
-        <button id="btn-close-grammar" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200">
+        <button id="btn-close-grammar" class="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-200 transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="p-5 overflow-y-auto space-y-4 font-mono text-xs">
-        <div class="bg-slate-900 text-slate-200 p-4 rounded-xl leading-relaxed">
-<pre class="whitespace-pre overflow-x-auto text-xs">
+      <div class="p-4 sm:p-5 overflow-y-auto touch-scroll space-y-3 font-mono text-xs">
+        <div class="bg-slate-900 text-slate-200 p-3 sm:p-4 rounded-xl leading-relaxed overflow-x-auto touch-scroll">
+<pre class="text-[11px] sm:text-xs">
 &lt;Program&gt;          ::= &lt;StatementList&gt; &lt;EOF&gt;
 &lt;StatementList&gt;    ::= &lt;Statement&gt;*
 
@@ -413,18 +440,20 @@
 </pre>
         </div>
 
-        <div class="border border-slate-200 rounded-xl overflow-hidden">
-          <div class="bg-slate-100 px-3 py-2 font-bold text-slate-700 text-xs">Custom Operator Precedence & Meanings</div>
-          <table class="w-full text-left text-xs">
-            <tbody class="divide-y divide-slate-100">
-              <tr><td class="py-1.5 px-3 font-bold text-blue-600">:=</td><td class="py-1.5 px-3">Assignment (Low precedence)</td></tr>
+        <div class="border border-slate-200 rounded-xl overflow-x-auto touch-scroll">
+          <table class="w-full text-left text-xs min-w-[280px]">
+            <thead class="bg-slate-100 text-slate-700 font-semibold border-b border-slate-200">
+              <tr><th class="py-1.5 px-3">Operator</th><th class="py-1.5 px-3">Action</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100 text-[11px] sm:text-xs">
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">:=</td><td class="py-1.5 px-3">Assign value</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">++&gt;</td><td class="py-1.5 px-3">Add numbers / Concatenate text</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&lt;--</td><td class="py-1.5 px-3">Subtract</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">***</td><td class="py-1.5 px-3">Multiply</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">://</td><td class="py-1.5 px-3">Divide</td></tr>
               <tr><td class="py-1.5 px-3 font-bold text-blue-600">&gt;&gt;</td><td class="py-1.5 px-3">Greater than</td></tr>
               <tr><td class="py-1.5 px-3 font-bold text-blue-600">&lt;&lt;</td><td class="py-1.5 px-3">Less than</td></tr>
-              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&gt;=;</td><td class="py-1.5 px-3">Greater than or equal to</td></tr>
-              <tr><td class="py-1.5 px-3 font-bold text-blue-600">++&gt;</td><td class="py-1.5 px-3">Addition (integers) or String Concatenation</td></tr>
-              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&lt;--</td><td class="py-1.5 px-3">Subtraction</td></tr>
-              <tr><td class="py-1.5 px-3 font-bold text-blue-600">***</td><td class="py-1.5 px-3">Multiplication (High precedence)</td></tr>
-              <tr><td class="py-1.5 px-3 font-bold text-blue-600">://</td><td class="py-1.5 px-3">Division (High precedence)</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&gt;=;</td><td class="py-1.5 px-3">Greater or equal</td></tr>
             </tbody>
           </table>
         </div>
@@ -432,7 +461,7 @@
     </div>
   </div>
 
-  <!-- JavaScript Logic -->
+  <!-- JavaScript Application Logic -->
   <script>
     // --- 1. SAMPLES ---
     const SAMPLES = {
@@ -570,7 +599,7 @@ halt`
               if (sc === '"') { closed = true; break; }
             }
             if (!closed) {
-              this.errors.push({ line, col: startCol, message: `Line ${line}: Unterminated string literal starting at column ${startCol}` });
+              this.errors.push({ line, col: startCol, message: `Line ${line}: Unterminated string literal` });
               return { tokens: this.tokens, errors: this.errors };
             }
             this.tokens.push(new Token(TokenType.STRING, str, line, startCol, 'Text Literal'));
@@ -746,7 +775,7 @@ halt`
           return { type: 'HaltStatement', line: h.line };
         }
 
-        const msg = `Line ${cur.line}: Expected valid statement, but found '${cur.lexeme}'`;
+        const msg = `Line ${cur.line}: Expected statement, found '${cur.lexeme}'`;
         this.errors.push({ line: cur.line, col: cur.col, message: msg });
         throw new Error(msg);
       }
@@ -883,14 +912,14 @@ halt`
 
           if (['>>', '<<', '>=;'].includes(e.op)) {
             if (lt !== 'INT' || rt !== 'INT') {
-              this.errors.push(`Comparison '${e.op}' requires numbers, found ${lt} and ${rt}.`);
+              this.errors.push(`Comparison '${e.op}' requires numbers.`);
             }
             return 'BOOL';
           }
           if (e.op === '++>') {
             if (lt === 'INT' && rt === 'INT') return 'INT';
             if (lt === 'STRING' && rt === 'STRING') return 'STRING';
-            this.errors.push(`Operator '++>' needs both numbers (addition) or both text (concatenation).`);
+            this.errors.push(`Operator '++>' needs both numbers or both text.`);
             return lt;
           }
           if (['<--', '***', '://'].includes(e.op)) {
@@ -1079,6 +1108,13 @@ halt`
     const compilerMsgContent = document.getElementById('compiler-msg-content');
     const msgBadge = document.getElementById('msg-badge');
 
+    // Panels for mobile toggle
+    const panelEditor = document.getElementById('panel-editor');
+    const panelResults = document.getElementById('panel-results');
+    const mobileTabEditor = document.getElementById('mobile-tab-editor');
+    const mobileTabResults = document.getElementById('mobile-tab-results');
+    const mobileResultBadge = document.getElementById('mobile-result-badge');
+
     // Pipeline step buttons
     const stepBtns = document.querySelectorAll('.step-btn');
     const stageTitle = document.getElementById('stage-title');
@@ -1095,6 +1131,7 @@ halt`
     // Modal
     const grammarModal = document.getElementById('grammar-modal');
     const btnGrammarModal = document.getElementById('btn-grammar-modal');
+    const btnGrammarModalMobile = document.getElementById('btn-grammar-modal-mobile');
     const btnCloseGrammar = document.getElementById('btn-close-grammar');
 
     let currentStage = 5;
@@ -1142,15 +1179,47 @@ halt`
       }
     }
 
+    // Modal handlers
     btnGrammarModal.addEventListener('click', () => grammarModal.classList.remove('hidden'));
+    btnGrammarModalMobile.addEventListener('click', () => grammarModal.classList.remove('hidden'));
     btnCloseGrammar.addEventListener('click', () => grammarModal.classList.add('hidden'));
 
+    // Mobile Segmented Switcher Logic
+    function showMobilePanel(panelName) {
+      if (window.innerWidth >= 1024) return; // Desktop uses side-by-side
+      if (panelName === 'editor') {
+        panelEditor.classList.remove('hidden');
+        panelResults.classList.add('hidden');
+        mobileTabEditor.className = "flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm text-center transition flex items-center justify-center gap-1.5";
+        mobileTabResults.className = "flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 text-center transition flex items-center justify-center gap-1.5";
+      } else {
+        panelEditor.classList.add('hidden');
+        panelResults.classList.remove('hidden');
+        panelResults.classList.add('flex');
+        mobileTabEditor.className = "flex-1 py-1.5 rounded-lg text-slate-600 hover:text-slate-900 text-center transition flex items-center justify-center gap-1.5";
+        mobileTabResults.className = "flex-1 py-1.5 rounded-lg bg-white text-slate-900 shadow-sm text-center transition flex items-center justify-center gap-1.5";
+      }
+    }
+
+    mobileTabEditor.addEventListener('click', () => showMobilePanel('editor'));
+    mobileTabResults.addEventListener('click', () => showMobilePanel('results'));
+
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        panelEditor.classList.remove('hidden');
+        panelResults.classList.remove('hidden');
+        panelResults.classList.add('flex');
+      } else {
+        showMobilePanel('editor');
+      }
+    });
+
     const STAGE_META = {
-      1: { title: "Stage 1: Lexical Analysis (Scanner)", desc: "Scans the source code character by character and classifies words into tokens.", stat: "Tokens" },
-      2: { title: "Stage 2: Syntax Analysis (Parser)", desc: "Builds a hierarchical Abstract Syntax Tree (AST) matching the grammar rules.", stat: "AST Nodes" },
-      3: { title: "Stage 3: Semantic Analysis (Symbol Table)", desc: "Verifies variables are declared before use and checks type compatibility.", stat: "Variables" },
-      4: { title: "Stage 4: Intermediate Code Generation (TAC)", desc: "Translates high-level statements into linear Three-Address Code and Quadruples.", stat: "Instructions" },
-      5: { title: "Stage 5: Final Output & Virtual Machine", desc: "Runs the instructions inside the Lumina VM and prints standard output.", stat: "Execution" }
+      1: { title: "Stage 1: Lexical Analysis (Scanner)", desc: "Scans source code character by character and classifies tokens.", stat: "Tokens" },
+      2: { title: "Stage 2: Syntax Analysis (Parser)", desc: "Builds a hierarchical Abstract Syntax Tree (AST) from grammar rules.", stat: "AST Nodes" },
+      3: { title: "Stage 3: Semantic Analysis (Symbol Table)", desc: "Verifies variable declaration before use and type safety.", stat: "Variables" },
+      4: { title: "Stage 4: Intermediate Code (TAC)", desc: "Translates statements into linear Three-Address Code and Quadruples.", stat: "Instructions" },
+      5: { title: "Stage 5: Final Output & Virtual Machine", desc: "Runs bytecode instructions in the VM and prints console output.", stat: "Execution" }
     };
 
     function setStage(stageNum) {
@@ -1172,6 +1241,11 @@ halt`
 
       stageTitle.textContent = STAGE_META[currentStage].title;
       stageDesc.textContent = STAGE_META[currentStage].desc;
+
+      // Ensure results panel is visible on mobile when a stage is tapped
+      if (window.innerWidth < 1024) {
+        showMobilePanel('results');
+      }
     }
 
     stepBtns.forEach(b => {
@@ -1185,12 +1259,14 @@ halt`
         syncLines();
         compileCode();
         setStage(5);
+        if (window.innerWidth < 1024) showMobilePanel('results');
       }
     });
 
     btnCompile.addEventListener('click', () => {
       compileCode();
       setStage(5);
+      if (window.innerWidth < 1024) showMobilePanel('results');
     });
 
     // --- PIPELINE STEPPER STATUS UPDATER ---
@@ -1200,20 +1276,16 @@ halt`
         const numSpan = btn.querySelector('.step-num');
 
         if (failedStage === null) {
-          // All passed
-          numSpan.className = "step-num w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold";
+          numSpan.className = "step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold";
           numSpan.innerHTML = "✓";
         } else if (s < failedStage) {
-          // Preceding stages passed
-          numSpan.className = "step-num w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold";
+          numSpan.className = "step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold";
           numSpan.innerHTML = "✓";
         } else if (s === failedStage) {
-          // This stage failed
-          numSpan.className = "step-num w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold animate-pulse";
+          numSpan.className = "step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold animate-pulse";
           numSpan.innerHTML = "✕";
         } else {
-          // Subsequent stages blocked
-          numSpan.className = "step-num w-5 h-5 rounded-full bg-slate-300 text-slate-500 flex items-center justify-center text-[10px]";
+          numSpan.className = "step-num w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-slate-300 text-slate-500 flex items-center justify-center text-[10px]";
           numSpan.innerHTML = `${s}`;
         }
       }
@@ -1271,11 +1343,12 @@ halt`
 
       // Full Success State
       updatePipelineStepper(null);
-      statusTag.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200";
+      statusTag.className = "hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200";
       statusDot.className = "w-2 h-2 rounded-full bg-emerald-500";
-      statusTagText.textContent = "Compiled & Executed Cleanly";
+      statusTagText.textContent = "Compiled Successfully";
+      mobileResultBadge.className = "w-2 h-2 rounded-full bg-emerald-500";
 
-      msgBadge.className = "text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200";
+      msgBadge.className = "text-[10px] sm:text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200";
       msgBadge.textContent = "0 Errors";
       compilerMsgContent.innerHTML = `<div class="text-emerald-700 font-medium">✓ Compilation succeeded! All 5 stages passed without errors.</div>`;
     }
@@ -1284,13 +1357,12 @@ halt`
     function handleCompilationError(stageNumber, stageName, errorMsg, lineNum = null) {
       updatePipelineStepper(stageNumber);
 
-      // Update Top Status Tag
-      statusTag.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200";
+      statusTag.className = "hidden md:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200";
       statusDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
-      statusTagText.textContent = `Error at Stage ${stageNumber} (${stageName})`;
+      statusTagText.textContent = `Error at Stage ${stageNumber}`;
+      mobileResultBadge.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
 
-      // Update Compiler Message Box (bottom left)
-      msgBadge.className = "text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200";
+      msgBadge.className = "text-[10px] sm:text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200";
       msgBadge.textContent = "Error";
       compilerMsgContent.innerHTML = `<div class="text-rose-600 font-semibold flex items-start gap-1.5">
         <span class="text-rose-500 text-sm">❌</span>
@@ -1300,42 +1372,39 @@ halt`
         </div>
       </div>`;
 
-      // Clear downstream data so old output is NEVER kept!
       if (stageNumber < 4) {
         document.getElementById('tac-list').innerHTML = `<li class="text-slate-500 italic">Code generation blocked by error in Stage ${stageNumber}.</li>`;
         document.getElementById('quad-table').innerHTML = `<tr><td colspan="5" class="py-3 text-center text-slate-400 italic">No quadruples generated due to compilation error.</td></tr>`;
       }
 
-      // CRITICAL: UPDATE STAGE 5 (TERMINAL & MEMORY) WITH ERROR SCREEN
       const vmBadge = document.getElementById('vm-halt-badge');
-      vmBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 border border-rose-700";
+      vmBadge.className = "text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 border border-rose-700";
       vmBadge.textContent = "STATUS: COMPILATION FAILED";
 
       const termScreen = document.getElementById('terminal-screen');
       termScreen.innerHTML = `
         <div class="text-rose-400 font-bold mb-2 pb-1 border-b border-rose-900/60 flex items-center justify-between">
-          <span>[!] COMPILATION ABORTED (NO BYTECODE EMITTED)</span>
-          <span class="text-slate-400 text-[11px]">Stage ${stageNumber} Failed</span>
+          <span>[!] COMPILATION ABORTED</span>
+          <span class="text-slate-400 text-[10px]">Stage ${stageNumber} Error</span>
         </div>
         <div class="text-slate-300 font-mono space-y-1">
-          <div class="text-slate-400">&gt; Source compilation halted due to an error in <strong class="text-rose-300">${stageName}</strong>:</div>
-          <div class="text-rose-400 bg-rose-950/60 border border-rose-900/80 p-2.5 rounded-lg my-2 font-mono">
+          <div class="text-slate-400">&gt; Source compilation halted in <strong class="text-rose-300">${stageName}</strong>:</div>
+          <div class="text-rose-400 bg-rose-950/60 border border-rose-900/80 p-2 sm:p-2.5 rounded-lg my-1.5 font-mono text-[11px] sm:text-xs">
             <strong>Error:</strong> ${escapeHtml(errorMsg)}
           </div>
-          <div class="text-slate-500 text-[11px] pt-1">
-            Execution stopped. Virtual Machine did not run because valid instructions were not produced. Fix the syntax/type error in the code editor to execute.
+          <div class="text-slate-500 text-[10px] sm:text-[11px] pt-1">
+            Execution stopped. Virtual Machine did not run because valid instructions were not produced. Fix the syntax/type error in the editor to execute.
           </div>
         </div>
       `;
 
-      // Clear memory cards
       document.getElementById('memory-cards').innerHTML = `
-        <div class="col-span-full p-3 rounded-lg bg-rose-50/50 border border-rose-200 text-rose-700 text-xs">
-          <strong>Memory not initialized:</strong> Runtime storage frame was not allocated because execution was aborted at Stage ${stageNumber}.
+        <div class="col-span-full p-2.5 rounded-lg bg-rose-50/50 border border-rose-200 text-rose-700 text-xs">
+          <strong>Memory not initialized:</strong> Runtime storage frame was not allocated because compilation was aborted at Stage ${stageNumber}.
         </div>
       `;
 
-      stageStatBadge.textContent = `Failed at Stage ${stageNumber}`;
+      stageStatBadge.textContent = `Error at Stage ${stageNumber}`;
     }
 
     // --- RENDER STAGE 1: LEXER ---
@@ -1351,14 +1420,14 @@ halt`
         else if (t.type === TokenType.IDENTIFIER) { id++; badgeColor = 'bg-purple-100 text-purple-800 border-purple-200'; }
         else if (t.type === TokenType.NUMBER || t.type === TokenType.STRING) { lit++; badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-200'; }
 
-        chipsHtml += `<span class="px-2 py-0.5 rounded border text-[11px] font-mono ${badgeColor}">${escapeHtml(t.lexeme)}</span>`;
+        chipsHtml += `<span class="px-2 py-0.5 rounded border text-[10px] sm:text-[11px] font-mono ${badgeColor}">${escapeHtml(t.lexeme)}</span>`;
 
         tableHtml += `<tr class="hover:bg-slate-50">
-          <td class="py-1.5 px-3 text-slate-400">${i + 1}</td>
-          <td class="py-1.5 px-3 text-slate-600">${t.line}:${t.col}</td>
-          <td class="py-1.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.type}</span></td>
-          <td class="py-1.5 px-3 font-bold text-slate-900">${escapeHtml(t.lexeme)}</td>
-          <td class="py-1.5 px-3 text-slate-500">${t.desc}</td>
+          <td class="py-1.5 px-2.5 text-slate-400">${i + 1}</td>
+          <td class="py-1.5 px-2.5 text-slate-600">${t.line}:${t.col}</td>
+          <td class="py-1.5 px-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.type}</span></td>
+          <td class="py-1.5 px-2.5 font-bold text-slate-900">${escapeHtml(t.lexeme)}</td>
+          <td class="py-1.5 px-2.5 text-slate-500">${t.desc}</td>
         </tr>`;
       });
 
@@ -1368,7 +1437,7 @@ halt`
       document.getElementById('stat-lit').textContent = lit;
       document.getElementById('token-chips').innerHTML = chipsHtml;
       document.getElementById('token-table').innerHTML = tableHtml;
-      stageStatBadge.textContent = `${tokens.length} Tokens Found`;
+      stageStatBadge.textContent = `${tokens.length} Tokens`;
     }
 
     document.getElementById('token-search').addEventListener('input', (e) => {
@@ -1377,11 +1446,11 @@ halt`
       lastTokens.forEach((t, i) => {
         if (q && !t.lexeme.toLowerCase().includes(q) && !t.type.toLowerCase().includes(q)) return;
         html += `<tr class="hover:bg-slate-50">
-          <td class="py-1.5 px-3 text-slate-400">${i + 1}</td>
-          <td class="py-1.5 px-3 text-slate-600">${t.line}:${t.col}</td>
-          <td class="py-1.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${t.type}</span></td>
-          <td class="py-1.5 px-3 font-bold text-slate-900">${escapeHtml(t.lexeme)}</td>
-          <td class="py-1.5 px-3 text-slate-500">${t.desc}</td>
+          <td class="py-1.5 px-2.5 text-slate-400">${i + 1}</td>
+          <td class="py-1.5 px-2.5 text-slate-600">${t.line}:${t.col}</td>
+          <td class="py-1.5 px-2.5"><span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${t.type}</span></td>
+          <td class="py-1.5 px-2.5 font-bold text-slate-900">${escapeHtml(t.lexeme)}</td>
+          <td class="py-1.5 px-2.5 text-slate-500">${t.desc}</td>
         </tr>`;
       });
       document.getElementById('token-table').innerHTML = html;
@@ -1408,7 +1477,7 @@ halt`
 
     function buildTree(node, depth = 0) {
       if (!node) return '';
-      const indent = depth * 18;
+      const indent = depth * 14;
       let label = `<span class="text-blue-400 font-bold">${node.type}</span>`;
       let detail = '';
 
@@ -1421,8 +1490,8 @@ halt`
       else if (node.type === 'Literal') detail = `[Value: <span class="text-emerald-400">${escapeHtml(String(node.raw))}</span>]`;
       else if (node.type === 'Identifier') detail = `[Var: <span class="text-purple-400">${node.name}</span>]`;
 
-      let h = `<div style="margin-left:${indent}px" class="py-1 px-2 rounded hover:bg-slate-800 transition flex items-center gap-2">
-        <span class="text-slate-600">└─</span> ${label} <span class="text-slate-400 text-[11px]">${detail}</span>
+      let h = `<div style="margin-left:${indent}px" class="py-1 px-1.5 rounded hover:bg-slate-800 transition flex items-center gap-1.5">
+        <span class="text-slate-600">└─</span> ${label} <span class="text-slate-400 text-[10px] sm:text-[11px]">${detail}</span>
       </div>`;
 
       if (node.statements) node.statements.forEach(s => h += buildTree(s, depth + 1));
@@ -1443,34 +1512,34 @@ halt`
     const jsonContainer = document.getElementById('json-container');
 
     btnTreeVisual.addEventListener('click', () => {
-      btnTreeVisual.className = "px-3 py-1 rounded bg-blue-600 text-white font-medium text-xs";
-      btnTreeJson.className = "px-3 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100";
+      btnTreeVisual.className = "px-2.5 py-1 rounded bg-blue-600 text-white font-medium text-xs";
+      btnTreeJson.className = "px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100";
       treeContainer.classList.remove('hidden');
       jsonContainer.classList.add('hidden');
     });
 
     btnTreeJson.addEventListener('click', () => {
-      btnTreeJson.className = "px-3 py-1 rounded bg-blue-600 text-white font-medium text-xs";
-      btnTreeVisual.className = "px-3 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100";
+      btnTreeJson.className = "px-2.5 py-1 rounded bg-blue-600 text-white font-medium text-xs";
+      btnTreeVisual.className = "px-2.5 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100";
       treeContainer.classList.add('hidden');
       jsonContainer.classList.remove('hidden');
     });
 
     // --- RENDER STAGE 3: SEMANTIC ---
     function renderSemantic(res) {
-      document.getElementById('check-declared-card').className = "p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5";
+      document.getElementById('check-declared-card').className = "p-2.5 sm:p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2";
       document.getElementById('check-declared-icon').textContent = "✓";
       document.getElementById('check-declared-icon').className = "text-emerald-600 font-bold text-sm";
       document.getElementById('check-declared-desc').textContent = "All referenced variables exist in scope.";
 
-      document.getElementById('check-types-card').className = "p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5";
+      document.getElementById('check-types-card').className = "p-2.5 sm:p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2";
       document.getElementById('check-types-icon').textContent = "✓";
       document.getElementById('check-types-icon').className = "text-emerald-600 font-bold text-sm";
       document.getElementById('check-types-desc').textContent = "Values match variable types (INT, STRING, BOOL).";
 
       let h = '';
       if (res.symbols.length === 0) {
-        h = '<tr><td colspan="5" class="py-2.5 px-3 text-slate-400 italic text-center">No variables declared</td></tr>';
+        h = '<tr><td colspan="5" class="py-2 px-2.5 text-slate-400 italic text-center">No variables declared</td></tr>';
       } else {
         res.symbols.forEach(s => {
           let badge = 'bg-blue-50 text-blue-700 border-blue-200';
@@ -1478,11 +1547,11 @@ halt`
           if (s.type === 'BOOL') badge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
 
           h += `<tr>
-            <td class="py-2 px-3 font-bold text-slate-900">${s.name}</td>
-            <td class="py-2 px-3"><span class="px-2 py-0.5 rounded border text-[10px] font-bold ${badge}">${s.type}</span></td>
-            <td class="py-2 px-3 text-slate-600">Global Scope</td>
-            <td class="py-2 px-3 text-slate-500">Line ${s.line}</td>
-            <td class="py-2 px-3 text-slate-700 font-semibold" id="sym-val-${s.name}">-</td>
+            <td class="py-1.5 px-2.5 font-bold text-slate-900">${s.name}</td>
+            <td class="py-1.5 px-2.5"><span class="px-1.5 py-0.5 rounded border text-[10px] font-bold ${badge}">${s.type}</span></td>
+            <td class="py-1.5 px-2.5 text-slate-600">Global</td>
+            <td class="py-1.5 px-2.5 text-slate-500">L${s.line}</td>
+            <td class="py-1.5 px-2.5 text-slate-700 font-semibold" id="sym-val-${s.name}">-</td>
           </tr>`;
         });
       }
@@ -1492,12 +1561,12 @@ halt`
     function renderSemanticError(errMsg) {
       const isUndeclared = errMsg.includes("declaration") || errMsg.includes("Undeclared");
       if (isUndeclared) {
-        document.getElementById('check-declared-card').className = "p-3 bg-rose-50 border border-rose-300 rounded-xl flex items-start gap-2.5";
+        document.getElementById('check-declared-card').className = "p-2.5 sm:p-3 bg-rose-50 border border-rose-300 rounded-xl flex items-start gap-2";
         document.getElementById('check-declared-icon').textContent = "✕";
         document.getElementById('check-declared-icon').className = "text-rose-600 font-bold text-sm";
         document.getElementById('check-declared-desc').textContent = errMsg;
       } else {
-        document.getElementById('check-types-card').className = "p-3 bg-rose-50 border border-rose-300 rounded-xl flex items-start gap-2.5";
+        document.getElementById('check-types-card').className = "p-2.5 sm:p-3 bg-rose-50 border border-rose-300 rounded-xl flex items-start gap-2";
         document.getElementById('check-types-icon').textContent = "✕";
         document.getElementById('check-types-icon').className = "text-rose-600 font-bold text-sm";
         document.getElementById('check-types-desc').textContent = errMsg;
@@ -1520,20 +1589,20 @@ halt`
         else if (['>', '<', '>='].includes(q.op)) opClass = 'font-bold text-amber-600';
 
         qH += `<tr>
-          <td class="py-1.5 px-2.5 text-slate-400">${q.idx}</td>
-          <td class="py-1.5 px-2.5 ${opClass}">${q.op}</td>
-          <td class="py-1.5 px-2.5 text-slate-700">${escapeHtml(String(q.a1))}</td>
-          <td class="py-1.5 px-2.5 text-slate-700">${escapeHtml(String(q.a2))}</td>
-          <td class="py-1.5 px-2.5 font-bold text-slate-900">${escapeHtml(String(q.res))}</td>
+          <td class="py-1 px-2 text-slate-400">${q.idx}</td>
+          <td class="py-1 px-2 ${opClass}">${q.op}</td>
+          <td class="py-1 px-2 text-slate-700">${escapeHtml(String(q.a1))}</td>
+          <td class="py-1 px-2 text-slate-700">${escapeHtml(String(q.a2))}</td>
+          <td class="py-1 px-2 font-bold text-slate-900">${escapeHtml(String(q.res))}</td>
         </tr>`;
       });
       document.getElementById('quad-table').innerHTML = qH;
     }
 
-    // --- RENDER STAGE 5: VM & OUTPUT (SUCCESS) ---
+    // --- RENDER STAGE 5: VM & OUTPUT ---
     function renderVM(res) {
       const vmBadge = document.getElementById('vm-halt-badge');
-      vmBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700";
+      vmBadge.className = "text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700";
       vmBadge.textContent = "STATUS: HALTED (CLEAN)";
 
       let screenH = '';
@@ -1544,7 +1613,7 @@ halt`
           screenH += `<div class="text-emerald-400 font-semibold flex items-center gap-1.5"><span class="text-slate-500">&gt;</span> ${escapeHtml(line)}</div>`;
         });
       }
-      screenH += `<div class="text-slate-500 text-[11px] pt-3">[Program completed execution]</div>`;
+      screenH += `<div class="text-slate-500 text-[10px] sm:text-[11px] pt-2 sm:pt-3">[Program completed execution]</div>`;
       document.getElementById('terminal-screen').innerHTML = screenH;
 
       let memH = '';
@@ -1559,7 +1628,7 @@ halt`
             const symEl = document.getElementById(`sym-val-${k}`);
             if (symEl) symEl.textContent = JSON.stringify(v);
           }
-          memH += `<div class="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between">
+          memH += `<div class="p-2 sm:p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between">
             <span class="${isTemp ? 'text-slate-400' : 'text-slate-900 font-bold'}">${k}</span>
             <span class="text-blue-600 font-semibold">${escapeHtml(JSON.stringify(v))}</span>
           </div>`;

@@ -40,4 +40,3 @@ This project presents an interactive web application that implements and visuali
 ## 3. How to Run
 - **Web Application:** Double-click or open `index.html` in any modern web browser (Chrome, Firefox, Edge, Safari). No web server, node installation, or build step is required!
 - Select any preset from the dropdown (or paste custom Lumina code) and click **Compile & Run**.
-"# lumina-compiler-project" 
