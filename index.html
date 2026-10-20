@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-50 text-slate-800">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lumina Compiler Studio - Compiler Construction Project</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+  </style>
+</head>
+<body class="h-full flex flex-col bg-slate-100 text-slate-800 antialiased">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-slate-200 px-5 py-3 flex flex-wrap items-center justify-between gap-4 shrink-0 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-xl bg-blue-600 text-white font-bold text-lg flex items-center justify-center shadow-md shadow-blue-500/20">
+        L
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="text-base font-bold text-slate-900 tracking-tight">Lumina Compiler Studio</h1>
+          <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full font-semibold">Term Project</span>
+          <span class="text-xs bg-slate-100 text-slate-600 border border-slate-200 px-2 py-0.5 rounded-full font-medium">Lab 02 Spec</span>
+        </div>
+        <p class="text-xs text-slate-500">Compiler Construction &bull; 5-Stage Compilation Pipeline &bull; Interactive Virtual Machine</p>
+      </div>
+    </div>
+
+    <!-- Actions & Preset Selector -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm">
+        <label for="example-select" class="text-xs font-semibold text-slate-600">Sample Code:</label>
+        <select id="example-select" class="bg-transparent text-xs text-slate-800 font-medium focus:outline-none cursor-pointer pr-1">
+          <option value="lab02">1. Official Lab 02 Code (Score Check)</option>
+          <option value="loop">2. While Loop & Arithmetic (Count 1 to 5)</option>
+          <option value="ifelse">3. If / Else Decision (Grade Check)</option>
+          <option value="strings">4. String Concatenation & Output</option>
+          <option value="err_type">5. Test Error: Type Mismatch (Int := Text)</option>
+          <option value="err_undeclared">6. Test Error: Undeclared Variable</option>
+          <option value="err_syntax">7. Test Error: Missing Syntax (No Expression)</option>
+        </select>
+      </div>
+
+      <button id="btn-compile" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition">
+        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        <span>Run Compiler</span>
+      </button>
+
+      <button id="btn-grammar-modal" class="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 font-medium text-xs shadow-sm transition">
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+        <span>View Language Grammar</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Visual Pipeline Stepper Bar -->
+  <div class="bg-white border-b border-slate-200 px-5 py-2.5 shrink-0 flex items-center justify-between flex-wrap gap-3">
+    <div class="flex items-center gap-1 sm:gap-2 text-xs overflow-x-auto w-full md:w-auto">
+      <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1 shrink-0">Pipeline:</span>
+      
+      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="1" id="step-1-btn">
+        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">1</span>
+        <span>Lexer (Tokens)</span>
+      </button>
+      
+      <span class="text-slate-300 shrink-0">&rarr;</span>
+      
+      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="2" id="step-2-btn">
+        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">2</span>
+        <span>Parser (AST)</span>
+      </button>
+      
+      <span class="text-slate-300 shrink-0">&rarr;</span>
+      
+      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="3" id="step-3-btn">
+        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">3</span>
+        <span>Semantic (Symbols)</span>
+      </button>
+      
+      <span class="text-slate-300 shrink-0">&rarr;</span>
+      
+      <button class="step-btn px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 transition shrink-0" data-stage="4" id="step-4-btn">
+        <span class="step-num w-5 h-5 rounded-full bg-slate-400 text-white flex items-center justify-center text-[10px]">4</span>
+        <span>Intermediate (TAC)</span>
+      </button>
+      
+      <span class="text-slate-300 shrink-0">&rarr;</span>
+      
+      <button class="step-btn active px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-200 transition shrink-0" data-stage="5" id="step-5-btn">
+        <span class="step-num w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">5</span>
+        <span>Program Output</span>
+      </button>
+    </div>
+
+    <!-- Global Status Tag -->
+    <div id="status-tag" class="flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+      <span id="status-dot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+      <span id="status-tag-text">Compiled Successfully</span>
+    </div>
+  </div>
+
+  <!-- Main Work Area: Left Editor, Right Stage Inspector -->
+  <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden bg-slate-100 gap-0">
+    
+    <!-- LEFT PANE: SOURCE CODE EDITOR (5 Columns) -->
+    <section class="lg:col-span-5 flex flex-col bg-white border-r border-slate-200 overflow-hidden shadow-sm">
+      <!-- Editor Header -->
+      <div class="px-4 py-2.5 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Source Code (Lumina Lang)</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="btn-clear" class="text-xs text-slate-500 hover:text-slate-700 px-2 py-1 rounded hover:bg-slate-200 transition">Clear</button>
+          <button id="btn-copy" class="text-xs text-blue-600 hover:text-blue-800 font-medium px-2 py-1 rounded hover:bg-blue-50 transition">Copy Code</button>
+        </div>
+      </div>
+
+      <!-- Quick Syntax Buttons for Quick Testing -->
+      <div class="px-3 py-2 bg-slate-100/70 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto text-xs shrink-0">
+        <span class="text-slate-400 font-semibold text-[11px] mr-1 shrink-0">Click to add:</span>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 transition shrink-0" data-insert="Bindint ">Bindint</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 transition shrink-0" data-insert="Bindstrng ">Bindstrng</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 hover:text-blue-600 transition shrink-0" data-insert="Bindbool ">Bindbool</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-emerald-700 font-mono text-[11px] hover:border-emerald-400 transition shrink-0" data-insert=" := ">:=</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-amber-700 font-mono text-[11px] hover:border-amber-400 transition shrink-0" data-insert="Turnout ">Turnout</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-indigo-700 font-mono text-[11px] hover:border-indigo-400 transition shrink-0" data-insert="examine ">examine</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-indigo-700 font-mono text-[11px] hover:border-indigo-400 transition shrink-0" data-insert="otherwise ">otherwise</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-purple-700 font-mono text-[11px] hover:border-purple-400 transition shrink-0" data-insert="noose ">noose</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-rose-700 font-mono text-[11px] hover:border-rose-400 transition shrink-0" data-insert="halt">halt</button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 transition shrink-0" data-insert=" ++> ">++></button>
+        <button class="syntax-chip px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono text-[11px] hover:border-blue-400 transition shrink-0" data-insert=" >> ">>></button>
+      </div>
+
+      <!-- Editor Textarea Area with Line Numbers -->
+      <div class="flex-1 flex overflow-hidden font-mono text-[13px] bg-slate-900 text-slate-100">
+        <div id="editor-lines" class="w-10 bg-slate-950 text-slate-500 py-3 text-right pr-2 select-none border-r border-slate-800 shrink-0 leading-relaxed font-mono text-xs">
+          1
+        </div>
+        <textarea id="source-editor" spellcheck="false" class="flex-1 bg-transparent text-slate-100 p-3 leading-relaxed resize-none focus:outline-none focus:ring-0 selection:bg-blue-600 selection:text-white font-mono" placeholder="Write Lumina Lang code here..."></textarea>
+      </div>
+
+      <!-- Compiler Messages Box -->
+      <div class="border-t border-slate-200 bg-white p-3 shrink-0">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Compiler Messages</span>
+          <span id="msg-badge" class="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">0 Errors</span>
+        </div>
+        <div id="compiler-msg-content" class="bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs font-mono min-h-[55px] max-h-[85px] overflow-y-auto">
+          <div class="text-emerald-700 font-medium">✓ All checks passed. Code compiled cleanly.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT PANE: STAGE RESULTS VIEWER (7 Columns) -->
+    <section class="lg:col-span-7 flex flex-col bg-white overflow-hidden">
+      
+      <!-- Stage Header with Title and Plain-English Explanation -->
+      <div class="px-5 py-3 border-b border-slate-200 bg-slate-50/80 flex items-center justify-between flex-wrap gap-2">
+        <div>
+          <h2 id="stage-title" class="text-sm font-bold text-slate-900">Stage 5: Final Output & Virtual Machine</h2>
+          <p id="stage-desc" class="text-xs text-slate-500">Runs the instructions inside the Lumina VM and prints standard output.</p>
+        </div>
+        <div id="stage-stat-badge" class="text-xs font-semibold px-2.5 py-1 rounded bg-slate-200 text-slate-700 font-mono">
+          Ready
+        </div>
+      </div>
+
+      <!-- Stage Views Container -->
+      <div class="flex-1 overflow-y-auto p-5">
+
+        <!-- VIEW 1: LEXICAL TOKENS -->
+        <div id="view-stage-1" class="hidden space-y-4">
+          <!-- Summary Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div class="p-3 bg-blue-50 border border-blue-100 rounded-xl">
+              <div class="text-xs text-blue-600 font-medium">Keywords</div>
+              <div id="stat-kw" class="text-xl font-bold text-blue-900 font-mono">0</div>
+            </div>
+            <div class="p-3 bg-amber-50 border border-amber-100 rounded-xl">
+              <div class="text-xs text-amber-600 font-medium">Operators</div>
+              <div id="stat-op" class="text-xl font-bold text-amber-900 font-mono">0</div>
+            </div>
+            <div class="p-3 bg-purple-50 border border-purple-100 rounded-xl">
+              <div class="text-xs text-purple-600 font-medium">Variables (Identifiers)</div>
+              <div id="stat-id" class="text-xl font-bold text-purple-900 font-mono">0</div>
+            </div>
+            <div class="p-3 bg-emerald-50 border border-emerald-100 rounded-xl">
+              <div class="text-xs text-emerald-600 font-medium">Numbers & Strings</div>
+              <div id="stat-lit" class="text-xl font-bold text-emerald-900 font-mono">0</div>
+            </div>
+          </div>
+
+          <!-- Token Stream (Easy visual flow) -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+            <div class="text-xs font-bold text-slate-700 mb-2">Token Stream (Visual Order):</div>
+            <div id="token-chips" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto font-mono text-xs">
+              <!-- Tokens chips -->
+            </div>
+          </div>
+
+          <!-- Tokens Table -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div class="bg-white px-4 py-2 border-b border-slate-200 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-700 uppercase tracking-wider">Token Classification Table</span>
+              <input id="token-search" type="text" placeholder="Search tokens..." class="text-xs border border-slate-200 rounded-md px-2.5 py-1 focus:outline-none focus:border-blue-500 w-40">
+            </div>
+            <div class="max-h-80 overflow-y-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200 sticky top-0">
+                  <tr>
+                    <th class="py-2.5 px-3">#</th>
+                    <th class="py-2.5 px-3">Position</th>
+                    <th class="py-2.5 px-3">Token Type</th>
+                    <th class="py-2.5 px-3">Text (Lexeme)</th>
+                    <th class="py-2.5 px-3">Meaning</th>
+                  </tr>
+                </thead>
+                <tbody id="token-table" class="divide-y divide-slate-100 font-mono">
+                  <!-- Token rows -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- VIEW 2: SYNTAX PARSE TREE (AST) -->
+        <div id="view-stage-2" class="hidden space-y-4">
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between">
+            <span class="text-xs font-semibold text-slate-700">Display Format:</span>
+            <div class="flex items-center gap-2">
+              <button id="btn-tree-visual" class="px-3 py-1 rounded bg-blue-600 text-white font-medium text-xs">Tree View</button>
+              <button id="btn-tree-json" class="px-3 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100">JSON View</button>
+            </div>
+          </div>
+
+          <!-- Visual Tree -->
+          <div id="tree-container" class="bg-slate-900 text-slate-100 border border-slate-800 rounded-xl p-4 font-mono text-xs max-h-[420px] overflow-auto space-y-1">
+            <!-- Tree hierarchy -->
+          </div>
+
+          <!-- JSON Tree -->
+          <div id="json-container" class="hidden bg-slate-900 text-cyan-300 border border-slate-800 rounded-xl p-4 font-mono text-xs max-h-[420px] overflow-auto">
+            <pre id="json-pre"></pre>
+          </div>
+        </div>
+
+        <!-- VIEW 3: SEMANTIC ANALYSIS & SYMBOL TABLE -->
+        <div id="view-stage-3" class="hidden space-y-4">
+          <!-- Safety Checklist -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div id="check-declared-card" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5">
+              <span id="check-declared-icon" class="text-emerald-600 font-bold text-sm">✓</span>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Variables Declared Before Use</div>
+                <div id="check-declared-desc" class="text-[11px] text-slate-500">All referenced variables exist in scope.</div>
+              </div>
+            </div>
+            <div id="check-types-card" class="p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5">
+              <span id="check-types-icon" class="text-emerald-600 font-bold text-sm">✓</span>
+              <div>
+                <div class="text-xs font-bold text-slate-800">Type Compatibility Checked</div>
+                <div id="check-types-desc" class="text-[11px] text-slate-500">Values match variable types (INT, STRING, BOOL).</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Symbol Table -->
+          <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div class="bg-slate-50 px-4 py-2.5 border-b border-slate-200 font-bold text-xs text-slate-700">
+              Symbol Table (Variable Registry)
+            </div>
+            <table class="w-full text-left text-xs font-mono">
+              <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200">
+                <tr>
+                  <th class="py-2 px-3">Variable Name</th>
+                  <th class="py-2 px-3">Type</th>
+                  <th class="py-2 px-3">Scope</th>
+                  <th class="py-2 px-3">Declared At</th>
+                  <th class="py-2 px-3">Initial Value</th>
+                </tr>
+              </thead>
+              <tbody id="symbol-table" class="divide-y divide-slate-100 bg-white">
+                <!-- Symbols injected -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- VIEW 4: INTERMEDIATE CODE GENERATION (TAC) -->
+        <div id="view-stage-4" class="hidden space-y-4">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+            
+            <!-- Three Address Code (TAC) -->
+            <div class="md:col-span-5 flex flex-col">
+              <div class="text-xs font-bold text-slate-700 mb-1.5 flex items-center justify-between">
+                <span>Three-Address Code (TAC):</span>
+                <button id="btn-copy-tac" class="text-blue-600 hover:text-blue-800 font-medium text-[11px]">Copy TAC</button>
+              </div>
+              <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-xs text-cyan-300 max-h-[380px] overflow-y-auto flex-1">
+                <ol id="tac-list" class="space-y-1 list-decimal list-inside text-slate-200">
+                  <!-- TAC items -->
+                </ol>
+              </div>
+            </div>
+
+            <!-- Quadruples Table -->
+            <div class="md:col-span-7 flex flex-col">
+              <div class="text-xs font-bold text-slate-700 mb-1.5">
+                Quadruples (Operator, Arg1, Arg2, Result):
+              </div>
+              <div class="border border-slate-200 rounded-xl overflow-hidden shadow-sm max-h-[380px] overflow-y-auto">
+                <table class="w-full text-left text-xs font-mono">
+                  <thead class="bg-slate-100 text-slate-600 font-semibold border-b border-slate-200 sticky top-0">
+                    <tr>
+                      <th class="py-2 px-2.5">#</th>
+                      <th class="py-2 px-2.5">Op</th>
+                      <th class="py-2 px-2.5">Arg 1</th>
+                      <th class="py-2 px-2.5">Arg 2</th>
+                      <th class="py-2 px-2.5">Result</th>
+                    </tr>
+                  </thead>
+                  <tbody id="quad-table" class="divide-y divide-slate-100 bg-white">
+                    <!-- Quadruples -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- VIEW 5: PROGRAM OUTPUT & VM -->
+        <div id="view-stage-5" class="space-y-4">
+          <!-- Terminal -->
+          <div class="border border-slate-300 rounded-xl overflow-hidden shadow-md bg-slate-950 text-slate-100">
+            <div class="bg-slate-900 px-4 py-2 border-b border-slate-800 flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-amber-500 inline-block"></span>
+                <span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span>
+                <span class="text-xs text-slate-400 font-mono ml-2 font-medium">Program Console Output</span>
+              </div>
+              <span id="vm-halt-badge" class="text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700">
+                STATUS: HALTED
+              </span>
+            </div>
+            <div id="terminal-screen" class="p-4 font-mono text-xs min-h-[160px] max-h-[220px] overflow-y-auto space-y-1">
+              <!-- Output lines or error banner -->
+            </div>
+          </div>
+
+          <!-- Memory State -->
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-4">
+            <div class="text-xs font-bold text-slate-700 mb-2">Final Variable Values in Memory:</div>
+            <div id="memory-cards" class="grid grid-cols-2 sm:grid-cols-3 gap-2 text-xs font-mono">
+              <!-- Memory items -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Grammar Modal -->
+  <div id="grammar-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl w-full max-h-[85vh] flex flex-col overflow-hidden">
+      <div class="px-5 py-3.5 border-b border-slate-200 flex items-center justify-between bg-slate-50">
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Lumina Language Grammar (EBNF)</h3>
+          <p class="text-xs text-slate-500">Formal Context-Free Grammar and Operator Precedence Reference</p>
+        </div>
+        <button id="btn-close-grammar" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-200">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-5 overflow-y-auto space-y-4 font-mono text-xs">
+        <div class="bg-slate-900 text-slate-200 p-4 rounded-xl leading-relaxed">
+<pre class="whitespace-pre overflow-x-auto text-xs">
+&lt;Program&gt;          ::= &lt;StatementList&gt; &lt;EOF&gt;
+&lt;StatementList&gt;    ::= &lt;Statement&gt;*
+
+&lt;Statement&gt;        ::= &lt;VarDeclStmt&gt;
+                     | &lt;AssignStmt&gt;
+                     | &lt;PrintStmt&gt;
+                     | &lt;IfStmt&gt;
+                     | &lt;WhileStmt&gt;
+                     | &lt;HaltStmt&gt;
+                     | &lt;BlockStmt&gt;
+
+&lt;VarDeclStmt&gt;      ::= ("Bindint" | "Bindstrng" | "Bindbool") &lt;ID&gt; ":=" &lt;Expr&gt;
+&lt;AssignStmt&gt;       ::= &lt;ID&gt; ":=" &lt;Expr&gt;
+&lt;PrintStmt&gt;        ::= "Turnout" &lt;Expr&gt;
+&lt;IfStmt&gt;           ::= "examine" &lt;Expr&gt; &lt;Statement&gt; [ "otherwise" &lt;Statement&gt; ]
+&lt;WhileStmt&gt;        ::= "noose" &lt;Expr&gt; &lt;Statement&gt;
+&lt;BlockStmt&gt;        ::= "{" &lt;StatementList&gt; "}"
+&lt;HaltStmt&gt;         ::= "halt"
+
+&lt;Expr&gt;             ::= &lt;Relational&gt;
+&lt;Relational&gt;       ::= &lt;Additive&gt; [ ( "&gt;&gt;" | "&lt;&lt;" | "&gt;=;" ) &lt;Additive&gt; ]
+&lt;Additive&gt;         ::= &lt;Multiplicative&gt; ( ( "++&gt;" | "&lt;--" ) &lt;Multiplicative&gt; )*
+&lt;Multiplicative&gt;   ::= &lt;Primary&gt; ( ( "***" | "://" ) &lt;Primary&gt; )*
+&lt;Primary&gt;          ::= &lt;NUMBER&gt; | &lt;STRING&gt; | "True" | "False" | &lt;ID&gt; | "(" &lt;Expr&gt; ")"
+</pre>
+        </div>
+
+        <div class="border border-slate-200 rounded-xl overflow-hidden">
+          <div class="bg-slate-100 px-3 py-2 font-bold text-slate-700 text-xs">Custom Operator Precedence & Meanings</div>
+          <table class="w-full text-left text-xs">
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">:=</td><td class="py-1.5 px-3">Assignment (Low precedence)</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&gt;&gt;</td><td class="py-1.5 px-3">Greater than</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&lt;&lt;</td><td class="py-1.5 px-3">Less than</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&gt;=;</td><td class="py-1.5 px-3">Greater than or equal to</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">++&gt;</td><td class="py-1.5 px-3">Addition (integers) or String Concatenation</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">&lt;--</td><td class="py-1.5 px-3">Subtraction</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">***</td><td class="py-1.5 px-3">Multiplication (High precedence)</td></tr>
+              <tr><td class="py-1.5 px-3 font-bold text-blue-600">://</td><td class="py-1.5 px-3">Division (High precedence)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script>
+    // --- 1. SAMPLES ---
+    const SAMPLES = {
+      lab02: `# Official Lab 02 Code
+Bindint score := 100
+Bindstrng status := "Passed"
+Bindbool isWinner := True
+
+examine score >> 50
+  Turnout status
+
+halt`,
+
+      loop: `# Counting loop using 'noose'
+Bindint count := 1
+Bindint sum := 0
+
+noose count << 6 {
+  sum := sum ++> count
+  Turnout sum
+  count := count ++> 1
+}
+
+Turnout "Loop finished successfully!"
+halt`,
+
+      ifelse: `# Conditional logic with 'otherwise'
+Bindint marks := 82
+Bindstrng grade := "Pending"
+
+examine marks >=; 80 {
+  grade := "Grade A (Honors)"
+  Turnout grade
+} otherwise {
+  grade := "Passing Grade"
+  Turnout grade
+}
+
+halt`,
+
+      strings: `# String concatenation with ++>
+Bindstrng first := "Compiler"
+Bindstrng second := "Project"
+Bindstrng result := first ++> " " ++> second
+
+Turnout result
+halt`,
+
+      err_type: `# Error: Cannot assign text to an integer variable
+Bindint number := "Hello World"
+Turnout number
+halt`,
+
+      err_undeclared: `# Error: Variable used before declaration
+total := 100 ++> 5
+Turnout total
+halt`,
+
+      err_syntax: `# Error: Incomplete statement (missing expression)
+Bindint score := 
+examine >> 50
+halt`
+    };
+
+    // --- 2. COMPILER LOGIC ---
+    const TokenType = {
+      KEYWORD: 'KEYWORD',
+      OPERATOR: 'OPERATOR',
+      IDENTIFIER: 'IDENTIFIER',
+      NUMBER: 'NUMBER',
+      STRING: 'STRING',
+      DELIMITER: 'DELIMITER',
+      EOF: 'EOF'
+    };
+
+    const KEYWORDS = {
+      "Bindint": "Declare Integer",
+      "Bindstrng": "Declare String",
+      "Bindbool": "Declare Boolean",
+      "Turnout": "Print Output",
+      "examine": "If Condition",
+      "otherwise": "Else Condition",
+      "noose": "While Loop",
+      "routine": "Function",
+      "halt": "End Program",
+      "True": "Boolean True",
+      "False": "Boolean False"
+    };
+
+    class Token {
+      constructor(type, lexeme, line, col, desc) {
+        this.type = type;
+        this.lexeme = lexeme;
+        this.line = line;
+        this.col = col;
+        this.desc = desc;
+      }
+    }
+
+    class Lexer {
+      constructor(source) {
+        this.source = source;
+        this.tokens = [];
+        this.errors = [];
+      }
+
+      tokenize() {
+        let line = 1, col = 1, i = 0;
+        const len = this.source.length;
+
+        while (i < len) {
+          const ch = this.source[i];
+
+          if (ch === '\n') { line++; col = 1; i++; continue; }
+          if (ch === ' ' || ch === '\t' || ch === '\r') { col++; i++; continue; }
+
+          if (ch === '#') {
+            while (i < len && this.source[i] !== '\n') i++;
+            continue;
+          }
+
+          if (ch === '"') {
+            const startCol = col;
+            let str = '"';
+            i++; col++;
+            let closed = false;
+            while (i < len) {
+              const sc = this.source[i];
+              if (sc === '\n') break;
+              if (sc === '\\' && i + 1 < len) {
+                str += sc + this.source[i + 1];
+                i += 2; col += 2; continue;
+              }
+              str += sc; i++; col++;
+              if (sc === '"') { closed = true; break; }
+            }
+            if (!closed) {
+              this.errors.push({ line, col: startCol, message: `Line ${line}: Unterminated string literal starting at column ${startCol}` });
+              return { tokens: this.tokens, errors: this.errors };
+            }
+            this.tokens.push(new Token(TokenType.STRING, str, line, startCol, 'Text Literal'));
+            continue;
+          }
+
+          const op3 = this.source.substring(i, i + 3);
+          if (['++>', '<--', '***', '://', '>=;'].includes(op3)) {
+            this.tokens.push(new Token(TokenType.OPERATOR, op3, line, col, `Operator '${op3}'`));
+            i += 3; col += 3; continue;
+          }
+
+          const op2 = this.source.substring(i, i + 2);
+          if (['>>', '<<', ':='].includes(op2)) {
+            this.tokens.push(new Token(TokenType.OPERATOR, op2, line, col, `Operator '${op2}'`));
+            i += 2; col += 2; continue;
+          }
+
+          if (['{', '}', '(', ')', ';', ','].includes(ch)) {
+            this.tokens.push(new Token(TokenType.DELIMITER, ch, line, col, `Symbol '${ch}'`));
+            i++; col++; continue;
+          }
+
+          if (/[0-9]/.test(ch)) {
+            const startCol = col;
+            let num = '';
+            while (i < len && /[0-9]/.test(this.source[i])) { num += this.source[i]; i++; col++; }
+            if (i < len && this.source[i] === '.' && i + 1 < len && /[0-9]/.test(this.source[i + 1])) {
+              num += '.'; i++; col++;
+              while (i < len && /[0-9]/.test(this.source[i])) { num += this.source[i]; i++; col++; }
+            }
+            this.tokens.push(new Token(TokenType.NUMBER, num, line, startCol, 'Numeric Value'));
+            continue;
+          }
+
+          if (/[A-Za-z_]/.test(ch)) {
+            const startCol = col;
+            let word = '';
+            while (i < len && /[A-Za-z0-9_]/.test(this.source[i])) { word += this.source[i]; i++; col++; }
+            if (KEYWORDS.hasOwnProperty(word)) {
+              this.tokens.push(new Token(TokenType.KEYWORD, word, line, startCol, KEYWORDS[word]));
+            } else {
+              this.tokens.push(new Token(TokenType.IDENTIFIER, word, line, startCol, 'Variable Name'));
+            }
+            continue;
+          }
+
+          this.errors.push({ line, col, message: `Line ${line}, Col ${col}: Unexpected character '${ch}'` });
+          i++; col++;
+        }
+
+        this.tokens.push(new Token(TokenType.EOF, '<EOF>', line, col, 'End of Code'));
+        return { tokens: this.tokens, errors: this.errors };
+      }
+    }
+
+    class Parser {
+      constructor(tokens) {
+        this.tokens = tokens;
+        this.pos = 0;
+        this.errors = [];
+      }
+
+      current() { return this.tokens[this.pos] || new Token(TokenType.EOF, '<EOF>', 0, 0, ''); }
+      peek() { return this.tokens[this.pos + 1] || new Token(TokenType.EOF, '<EOF>', 0, 0, ''); }
+      consume() { return this.tokens[this.pos++]; }
+
+      expect(type, lexeme = null) {
+        const tok = this.current();
+        if (tok.type === type && (lexeme === null || tok.lexeme === lexeme)) {
+          return this.consume();
+        }
+        const expected = lexeme ? `'${lexeme}'` : type;
+        const msg = `Line ${tok.line}: Expected ${expected} but found '${tok.lexeme}'`;
+        this.errors.push({ line: tok.line, col: tok.col, message: msg });
+        throw new Error(msg);
+      }
+
+      parse() {
+        const statements = [];
+        while (this.current().type !== TokenType.EOF) {
+          if (this.current().lexeme === ';') { this.consume(); continue; }
+          try {
+            const stmt = this.parseStmt();
+            if (stmt) statements.push(stmt);
+          } catch (e) {
+            this.sync();
+          }
+        }
+        return { type: 'Program', statements };
+      }
+
+      sync() {
+        if (this.pos < this.tokens.length) this.consume();
+        while (this.current().type !== TokenType.EOF) {
+          if (['Bindint', 'Bindstrng', 'Bindbool', 'Turnout', 'examine', 'otherwise', 'noose', 'halt', '}'].includes(this.current().lexeme)) {
+            return;
+          }
+          this.consume();
+        }
+      }
+
+      parseStmt() {
+        const cur = this.current();
+
+        if (cur.type === TokenType.KEYWORD && ['Bindint', 'Bindstrng', 'Bindbool'].includes(cur.lexeme)) {
+          const typeTok = this.consume();
+          const varType = typeTok.lexeme === 'Bindint' ? 'INT' : (typeTok.lexeme === 'Bindstrng' ? 'STRING' : 'BOOL');
+          const id = this.expect(TokenType.IDENTIFIER);
+          this.expect(TokenType.OPERATOR, ':=');
+          const init = this.parseExpr();
+          return { type: 'VarDecl', varType, name: id.lexeme, initExpr: init, line: typeTok.line };
+        }
+
+        if (cur.type === TokenType.IDENTIFIER && this.peek().lexeme === ':=') {
+          const id = this.consume();
+          this.consume(); // :=
+          const expr = this.parseExpr();
+          return { type: 'Assignment', name: id.lexeme, expr, line: id.line };
+        }
+
+        if (cur.type === TokenType.KEYWORD && cur.lexeme === 'Turnout') {
+          const p = this.consume();
+          const expr = this.parseExpr();
+          return { type: 'PrintStatement', expr, line: p.line };
+        }
+
+        if (cur.type === TokenType.KEYWORD && cur.lexeme === 'examine') {
+          const ifTok = this.consume();
+          let condition;
+          if (this.current().lexeme === '(') {
+            this.consume();
+            condition = this.parseExpr();
+            this.expect(TokenType.DELIMITER, ')');
+          } else {
+            condition = this.parseExpr();
+          }
+          const thenBranch = this.parseStmt();
+          let elseBranch = null;
+          if (this.current().type === TokenType.KEYWORD && this.current().lexeme === 'otherwise') {
+            this.consume();
+            elseBranch = this.parseStmt();
+          }
+          return { type: 'IfStatement', condition, thenBranch, elseBranch, line: ifTok.line };
+        }
+
+        if (cur.type === TokenType.KEYWORD && cur.lexeme === 'noose') {
+          const loopTok = this.consume();
+          let condition;
+          if (this.current().lexeme === '(') {
+            this.consume();
+            condition = this.parseExpr();
+            this.expect(TokenType.DELIMITER, ')');
+          } else {
+            condition = this.parseExpr();
+          }
+          const body = this.parseStmt();
+          return { type: 'WhileStatement', condition, body, line: loopTok.line };
+        }
+
+        if (cur.lexeme === '{') {
+          this.consume();
+          const stmts = [];
+          while (this.current().lexeme !== '}' && this.current().type !== TokenType.EOF) {
+            stmts.push(this.parseStmt());
+          }
+          this.expect(TokenType.DELIMITER, '}');
+          return { type: 'Block', statements: stmts, line: cur.line };
+        }
+
+        if (cur.type === TokenType.KEYWORD && cur.lexeme === 'halt') {
+          const h = this.consume();
+          return { type: 'HaltStatement', line: h.line };
+        }
+
+        const msg = `Line ${cur.line}: Expected valid statement, but found '${cur.lexeme}'`;
+        this.errors.push({ line: cur.line, col: cur.col, message: msg });
+        throw new Error(msg);
+      }
+
+      parseExpr() { return this.parseRel(); }
+
+      parseRel() {
+        let left = this.parseAdd();
+        while (this.current().type === TokenType.OPERATOR && ['>>', '<<', '>=;'].includes(this.current().lexeme)) {
+          const op = this.consume().lexeme;
+          const right = this.parseAdd();
+          left = { type: 'BinaryOp', op, standardOp: op === '>>' ? '>' : (op === '<<' ? '<' : '>='), left, right };
+        }
+        return left;
+      }
+
+      parseAdd() {
+        let left = this.parseMul();
+        while (this.current().type === TokenType.OPERATOR && ['++>', '<--'].includes(this.current().lexeme)) {
+          const op = this.consume().lexeme;
+          const right = this.parseMul();
+          left = { type: 'BinaryOp', op, standardOp: op === '++>' ? '+' : '-', left, right };
+        }
+        return left;
+      }
+
+      parseMul() {
+        let left = this.parsePrimary();
+        while (this.current().type === TokenType.OPERATOR && ['***', '://'].includes(this.current().lexeme)) {
+          const op = this.consume().lexeme;
+          const right = this.parsePrimary();
+          left = { type: 'BinaryOp', op, standardOp: op === '***' ? '*' : '/', left, right };
+        }
+        return left;
+      }
+
+      parsePrimary() {
+        const cur = this.current();
+        if (cur.type === TokenType.NUMBER) {
+          this.consume();
+          return { type: 'Literal', valType: 'INT', raw: cur.lexeme, value: parseFloat(cur.lexeme) };
+        }
+        if (cur.type === TokenType.STRING) {
+          this.consume();
+          return { type: 'Literal', valType: 'STRING', raw: cur.lexeme, value: cur.lexeme.slice(1, -1) };
+        }
+        if (cur.type === TokenType.KEYWORD && (cur.lexeme === 'True' || cur.lexeme === 'False')) {
+          this.consume();
+          return { type: 'Literal', valType: 'BOOL', raw: cur.lexeme, value: cur.lexeme === 'True' };
+        }
+        if (cur.type === TokenType.IDENTIFIER) {
+          this.consume();
+          return { type: 'Identifier', name: cur.lexeme };
+        }
+        if (cur.lexeme === '(') {
+          this.consume();
+          const e = this.parseExpr();
+          this.expect(TokenType.DELIMITER, ')');
+          return e;
+        }
+        const msg = `Line ${cur.line}: Expected value or expression, found '${cur.lexeme}'`;
+        this.errors.push({ line: cur.line, col: cur.col, message: msg });
+        throw new Error(msg);
+      }
+    }
+
+    class SemanticChecker {
+      constructor(ast) {
+        this.ast = ast;
+        this.symbols = new Map();
+        this.errors = [];
+      }
+
+      check() {
+        for (const s of this.ast.statements) this.checkStmt(s);
+        return { symbols: Array.from(this.symbols.values()), errors: this.errors };
+      }
+
+      checkStmt(s) {
+        if (!s) return;
+        if (s.type === 'VarDecl') {
+          if (this.symbols.has(s.name)) {
+            this.errors.push(`Line ${s.line}: Variable '${s.name}' is already declared.`);
+          }
+          const t = this.checkExpr(s.initExpr);
+          if (t && t !== s.varType) {
+            this.errors.push(`Line ${s.line}: Type mismatch. Cannot assign ${t} to ${s.varType} variable '${s.name}'.`);
+          }
+          this.symbols.set(s.name, { name: s.name, type: s.varType, line: s.line, value: '-' });
+        } else if (s.type === 'Assignment') {
+          const sym = this.symbols.get(s.name);
+          if (!sym) {
+            this.errors.push(`Line ${s.line}: Variable '${s.name}' used before declaration.`);
+          }
+          const t = this.checkExpr(s.expr);
+          if (sym && t && t !== sym.type) {
+            this.errors.push(`Line ${s.line}: Type mismatch. Cannot assign ${t} to ${sym.type} variable '${s.name}'.`);
+          }
+        } else if (s.type === 'PrintStatement') {
+          this.checkExpr(s.expr);
+        } else if (s.type === 'IfStatement') {
+          const cond = this.checkExpr(s.condition);
+          if (cond && cond !== 'BOOL') {
+            this.errors.push(`Line ${s.line}: 'examine' condition must evaluate to True or False (BOOL).`);
+          }
+          this.checkStmt(s.thenBranch);
+          if (s.elseBranch) this.checkStmt(s.elseBranch);
+        } else if (s.type === 'WhileStatement') {
+          const cond = this.checkExpr(s.condition);
+          if (cond && cond !== 'BOOL') {
+            this.errors.push(`Line ${s.line}: 'noose' loop condition must evaluate to True or False (BOOL).`);
+          }
+          this.checkStmt(s.body);
+        } else if (s.type === 'Block') {
+          for (const st of s.statements) this.checkStmt(st);
+        }
+      }
+
+      checkExpr(e) {
+        if (!e) return null;
+        if (e.type === 'Literal') return e.valType;
+        if (e.type === 'Identifier') {
+          const s = this.symbols.get(e.name);
+          if (!s) {
+            this.errors.push(`Undeclared variable '${e.name}'.`);
+            return null;
+          }
+          return s.type;
+        }
+        if (e.type === 'BinaryOp') {
+          const lt = this.checkExpr(e.left);
+          const rt = this.checkExpr(e.right);
+          if (!lt || !rt) return null;
+
+          if (['>>', '<<', '>=;'].includes(e.op)) {
+            if (lt !== 'INT' || rt !== 'INT') {
+              this.errors.push(`Comparison '${e.op}' requires numbers, found ${lt} and ${rt}.`);
+            }
+            return 'BOOL';
+          }
+          if (e.op === '++>') {
+            if (lt === 'INT' && rt === 'INT') return 'INT';
+            if (lt === 'STRING' && rt === 'STRING') return 'STRING';
+            this.errors.push(`Operator '++>' needs both numbers (addition) or both text (concatenation).`);
+            return lt;
+          }
+          if (['<--', '***', '://'].includes(e.op)) {
+            if (lt !== 'INT' || rt !== 'INT') {
+              this.errors.push(`Operator '${e.op}' requires numbers.`);
+            }
+            return 'INT';
+          }
+        }
+        return null;
+      }
+    }
+
+    class ICG {
+      constructor(ast) {
+        this.ast = ast;
+        this.quads = [];
+        this.tCount = 0;
+        this.lCount = 0;
+        this.tac = [];
+      }
+
+      newT() { return `t${this.tCount++}`; }
+      newL() { return `L${this.lCount++}`; }
+
+      emit(op, a1, a2, res) {
+        const idx = this.quads.length;
+        this.quads.push({ idx, op, a1: a1 ?? '-', a2: a2 ?? '-', res: res ?? '-' });
+        let text = '';
+        if (op === 'ASSIGN') text = `${res} = ${a1}`;
+        else if (['+', '-', '*', '/', '>', '<', '>='].includes(op)) text = `${res} = ${a1} ${op} ${a2}`;
+        else if (op === 'PRINT') text = `print ${a1}`;
+        else if (op === 'IF_FALSE') text = `if_false ${a1} goto ${res}`;
+        else if (op === 'GOTO') text = `goto ${res}`;
+        else if (op === 'LABEL') text = `${res}:`;
+        else if (op === 'HALT') text = `halt`;
+        this.tac.push(text);
+        return res;
+      }
+
+      generate() {
+        for (const s of this.ast.statements) this.genStmt(s);
+        return { quads: this.quads, tac: this.tac };
+      }
+
+      genStmt(s) {
+        if (!s) return;
+        if (s.type === 'VarDecl' || s.type === 'Assignment') {
+          const val = this.genExpr(s.initExpr || s.expr);
+          this.emit('ASSIGN', val, null, s.name);
+        } else if (s.type === 'PrintStatement') {
+          const val = this.genExpr(s.expr);
+          this.emit('PRINT', val, null, null);
+        } else if (s.type === 'IfStatement') {
+          const c = this.genExpr(s.condition);
+          const elseL = this.newL();
+          const endL = s.elseBranch ? this.newL() : elseL;
+          this.emit('IF_FALSE', c, null, elseL);
+          this.genStmt(s.thenBranch);
+          if (s.elseBranch) {
+            this.emit('GOTO', null, null, endL);
+            this.emit('LABEL', null, null, elseL);
+            this.genStmt(s.elseBranch);
+            this.emit('LABEL', null, null, endL);
+          } else {
+            this.emit('LABEL', null, null, elseL);
+          }
+        } else if (s.type === 'WhileStatement') {
+          const startL = this.newL();
+          const exitL = this.newL();
+          this.emit('LABEL', null, null, startL);
+          const c = this.genExpr(s.condition);
+          this.emit('IF_FALSE', c, null, exitL);
+          this.genStmt(s.body);
+          this.emit('GOTO', null, null, startL);
+          this.emit('LABEL', null, null, exitL);
+        } else if (s.type === 'Block') {
+          for (const st of s.statements) this.genStmt(st);
+        } else if (s.type === 'HaltStatement') {
+          this.emit('HALT', null, null, null);
+        }
+      }
+
+      genExpr(e) {
+        if (!e) return null;
+        if (e.type === 'Literal') return e.raw;
+        if (e.type === 'Identifier') return e.name;
+        if (e.type === 'BinaryOp') {
+          const l = this.genExpr(e.left);
+          const r = this.genExpr(e.right);
+          const t = this.newT();
+          this.emit(e.standardOp, l, r, t);
+          return t;
+        }
+        return null;
+      }
+    }
+
+    class SimpleVM {
+      constructor(quads) {
+        this.quads = quads;
+        this.mem = {};
+        this.output = [];
+        this.halted = false;
+      }
+
+      run() {
+        let pc = 0, steps = 0;
+        const len = this.quads.length;
+        const labels = {};
+        for (let i = 0; i < len; i++) {
+          if (this.quads[i].op === 'LABEL') labels[this.quads[i].res] = i;
+        }
+
+        const getVal = (v) => {
+          if (v === '-' || v === null || v === undefined) return null;
+          if (typeof v === 'string') {
+            if (v.startsWith('"') && v.endsWith('"')) return v.slice(1, -1);
+            if (v === 'True') return true;
+            if (v === 'False') return false;
+            if (!isNaN(v) && !isNaN(parseFloat(v))) return parseFloat(v);
+            if (this.mem.hasOwnProperty(v)) return this.mem[v];
+          }
+          return v;
+        };
+
+        while (pc < len && steps < 1000 && !this.halted) {
+          const q = this.quads[pc];
+          steps++;
+          if (q.op === 'ASSIGN') {
+            this.mem[q.res] = getVal(q.a1);
+            pc++;
+          } else if (q.op === '+') {
+            this.mem[q.res] = getVal(q.a1) + getVal(q.a2);
+            pc++;
+          } else if (q.op === '-') {
+            this.mem[q.res] = getVal(q.a1) - getVal(q.a2);
+            pc++;
+          } else if (q.op === '*') {
+            this.mem[q.res] = getVal(q.a1) * getVal(q.a2);
+            pc++;
+          } else if (q.op === '/') {
+            const d = getVal(q.a2);
+            this.mem[q.res] = d === 0 ? 0 : Math.floor(getVal(q.a1) / d);
+            pc++;
+          } else if (q.op === '>') {
+            this.mem[q.res] = getVal(q.a1) > getVal(q.a2);
+            pc++;
+          } else if (q.op === '<') {
+            this.mem[q.res] = getVal(q.a1) < getVal(q.a2);
+            pc++;
+          } else if (q.op === '>=') {
+            this.mem[q.res] = getVal(q.a1) >= getVal(q.a2);
+            pc++;
+          } else if (q.op === 'PRINT') {
+            const out = getVal(q.a1);
+            this.output.push(out !== undefined ? String(out) : '');
+            pc++;
+          } else if (q.op === 'IF_FALSE') {
+            if (!getVal(q.a1)) pc = labels[q.res] ?? pc + 1;
+            else pc++;
+          } else if (q.op === 'GOTO') {
+            pc = labels[q.res] ?? pc + 1;
+          } else if (q.op === 'LABEL') {
+            pc++;
+          } else if (q.op === 'HALT') {
+            this.halted = true;
+          } else {
+            pc++;
+          }
+        }
+        return { output: this.output, mem: this.mem, halted: this.halted };
+      }
+    }
+
+    // --- 3. DOM WIRING ---
+    const editor = document.getElementById('source-editor');
+    const editorLines = document.getElementById('editor-lines');
+    const exampleSelect = document.getElementById('example-select');
+    const btnCompile = document.getElementById('btn-compile');
+    const btnClear = document.getElementById('btn-clear');
+    const btnCopy = document.getElementById('btn-copy');
+    const statusTag = document.getElementById('status-tag');
+    const statusDot = document.getElementById('status-dot');
+    const statusTagText = document.getElementById('status-tag-text');
+    const compilerMsgContent = document.getElementById('compiler-msg-content');
+    const msgBadge = document.getElementById('msg-badge');
+
+    // Pipeline step buttons
+    const stepBtns = document.querySelectorAll('.step-btn');
+    const stageTitle = document.getElementById('stage-title');
+    const stageDesc = document.getElementById('stage-desc');
+    const stageStatBadge = document.getElementById('stage-stat-badge');
+
+    // Views
+    const viewStage1 = document.getElementById('view-stage-1');
+    const viewStage2 = document.getElementById('view-stage-2');
+    const viewStage3 = document.getElementById('view-stage-3');
+    const viewStage4 = document.getElementById('view-stage-4');
+    const viewStage5 = document.getElementById('view-stage-5');
+
+    // Modal
+    const grammarModal = document.getElementById('grammar-modal');
+    const btnGrammarModal = document.getElementById('btn-grammar-modal');
+    const btnCloseGrammar = document.getElementById('btn-close-grammar');
+
+    let currentStage = 5;
+    let lastTokens = [], lastAst = null, lastIcg = null;
+
+    function syncLines() {
+      const lines = editor.value.split('\n').length;
+      let h = '';
+      for (let i = 1; i <= lines; i++) h += `<div>${i}</div>`;
+      editorLines.innerHTML = h;
+    }
+
+    editor.addEventListener('input', syncLines);
+    editor.addEventListener('scroll', () => { editorLines.scrollTop = editor.scrollTop; });
+
+    // Quick syntax chips
+    document.querySelectorAll('.syntax-chip').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const text = btn.getAttribute('data-insert');
+        const s = editor.selectionStart, e = editor.selectionEnd;
+        editor.value = editor.value.substring(0, s) + text + editor.value.substring(e);
+        editor.selectionStart = editor.selectionEnd = s + text.length;
+        editor.focus();
+        syncLines();
+      });
+    });
+
+    btnClear.addEventListener('click', () => {
+      editor.value = '';
+      syncLines();
+      editor.focus();
+    });
+
+    btnCopy.addEventListener('click', () => {
+      copyText(editor.value);
+    });
+
+    document.getElementById('btn-copy-tac').addEventListener('click', () => {
+      if (lastIcg && lastIcg.tac) copyText(lastIcg.tac.join('\n'));
+    });
+
+    function copyText(t) {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(t).catch(() => {});
+      }
+    }
+
+    btnGrammarModal.addEventListener('click', () => grammarModal.classList.remove('hidden'));
+    btnCloseGrammar.addEventListener('click', () => grammarModal.classList.add('hidden'));
+
+    const STAGE_META = {
+      1: { title: "Stage 1: Lexical Analysis (Scanner)", desc: "Scans the source code character by character and classifies words into tokens.", stat: "Tokens" },
+      2: { title: "Stage 2: Syntax Analysis (Parser)", desc: "Builds a hierarchical Abstract Syntax Tree (AST) matching the grammar rules.", stat: "AST Nodes" },
+      3: { title: "Stage 3: Semantic Analysis (Symbol Table)", desc: "Verifies variables are declared before use and checks type compatibility.", stat: "Variables" },
+      4: { title: "Stage 4: Intermediate Code Generation (TAC)", desc: "Translates high-level statements into linear Three-Address Code and Quadruples.", stat: "Instructions" },
+      5: { title: "Stage 5: Final Output & Virtual Machine", desc: "Runs the instructions inside the Lumina VM and prints standard output.", stat: "Execution" }
+    };
+
+    function setStage(stageNum) {
+      currentStage = parseInt(stageNum, 10);
+      stepBtns.forEach(b => {
+        const num = parseInt(b.getAttribute('data-stage'), 10);
+        if (num === currentStage) {
+          b.classList.add('ring-2', 'ring-blue-500', 'bg-blue-50', 'text-blue-700');
+          b.classList.remove('bg-slate-100');
+        } else {
+          b.classList.remove('ring-2', 'ring-blue-500', 'bg-blue-50', 'text-blue-700');
+        }
+      });
+
+      [viewStage1, viewStage2, viewStage3, viewStage4, viewStage5].forEach((v, idx) => {
+        if (idx + 1 === currentStage) v.classList.remove('hidden');
+        else v.classList.add('hidden');
+      });
+
+      stageTitle.textContent = STAGE_META[currentStage].title;
+      stageDesc.textContent = STAGE_META[currentStage].desc;
+    }
+
+    stepBtns.forEach(b => {
+      b.addEventListener('click', () => setStage(b.getAttribute('data-stage')));
+    });
+
+    exampleSelect.addEventListener('change', (e) => {
+      const code = SAMPLES[e.target.value];
+      if (code) {
+        editor.value = code;
+        syncLines();
+        compileCode();
+        setStage(5);
+      }
+    });
+
+    btnCompile.addEventListener('click', () => {
+      compileCode();
+      setStage(5);
+    });
+
+    // --- PIPELINE STEPPER STATUS UPDATER ---
+    function updatePipelineStepper(failedStage = null) {
+      for (let s = 1; s <= 5; s++) {
+        const btn = document.getElementById(`step-${s}-btn`);
+        const numSpan = btn.querySelector('.step-num');
+
+        if (failedStage === null) {
+          // All passed
+          numSpan.className = "step-num w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold";
+          numSpan.innerHTML = "✓";
+        } else if (s < failedStage) {
+          // Preceding stages passed
+          numSpan.className = "step-num w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold";
+          numSpan.innerHTML = "✓";
+        } else if (s === failedStage) {
+          // This stage failed
+          numSpan.className = "step-num w-5 h-5 rounded-full bg-rose-600 text-white flex items-center justify-center text-[10px] font-bold animate-pulse";
+          numSpan.innerHTML = "✕";
+        } else {
+          // Subsequent stages blocked
+          numSpan.className = "step-num w-5 h-5 rounded-full bg-slate-300 text-slate-500 flex items-center justify-center text-[10px]";
+          numSpan.innerHTML = `${s}`;
+        }
+      }
+    }
+
+    // --- MAIN COMPILER DRIVER ---
+    function compileCode() {
+      const code = editor.value;
+
+      // 1. Lexer Stage
+      const lexer = new Lexer(code);
+      const { tokens, errors: lexErr } = lexer.tokenize();
+      lastTokens = tokens;
+      renderLexer(tokens);
+
+      if (lexErr.length > 0) {
+        handleCompilationError(1, "Lexical Analysis", lexErr[0].message, lexErr[0].line);
+        return;
+      }
+
+      // 2. Parser Stage
+      const parser = new Parser(tokens);
+      let ast = null;
+      try { ast = parser.parse(); } catch (e) {}
+      lastAst = ast;
+
+      if (parser.errors.length > 0) {
+        renderParserError(parser.errors[0].message);
+        handleCompilationError(2, "Syntax Analysis (Parser)", parser.errors[0].message, parser.errors[0].line);
+        return;
+      }
+      renderParser(ast);
+
+      // 3. Semantic Stage
+      const sem = new SemanticChecker(ast);
+      const semRes = sem.check();
+
+      if (semRes.errors.length > 0) {
+        renderSemanticError(semRes.errors[0]);
+        handleCompilationError(3, "Semantic Analysis", semRes.errors[0]);
+        return;
+      }
+      renderSemantic(semRes);
+
+      // 4. ICG Stage
+      const icg = new ICG(ast);
+      const icgRes = icg.generate();
+      lastIcg = icgRes;
+      renderICG(icgRes);
+
+      // 5. VM Stage
+      const vm = new SimpleVM(icgRes.quads);
+      const vmRes = vm.run();
+      renderVM(vmRes);
+
+      // Full Success State
+      updatePipelineStepper(null);
+      statusTag.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200";
+      statusDot.className = "w-2 h-2 rounded-full bg-emerald-500";
+      statusTagText.textContent = "Compiled & Executed Cleanly";
+
+      msgBadge.className = "text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200";
+      msgBadge.textContent = "0 Errors";
+      compilerMsgContent.innerHTML = `<div class="text-emerald-700 font-medium">✓ Compilation succeeded! All 5 stages passed without errors.</div>`;
+    }
+
+    // --- HANDLE & DISPLAY COMPILATION ERROR ---
+    function handleCompilationError(stageNumber, stageName, errorMsg, lineNum = null) {
+      updatePipelineStepper(stageNumber);
+
+      // Update Top Status Tag
+      statusTag.className = "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200";
+      statusDot.className = "w-2 h-2 rounded-full bg-rose-500 animate-pulse";
+      statusTagText.textContent = `Error at Stage ${stageNumber} (${stageName})`;
+
+      // Update Compiler Message Box (bottom left)
+      msgBadge.className = "text-[11px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded border border-rose-200";
+      msgBadge.textContent = "Error";
+      compilerMsgContent.innerHTML = `<div class="text-rose-600 font-semibold flex items-start gap-1.5">
+        <span class="text-rose-500 text-sm">❌</span>
+        <div>
+          <div class="font-bold">[Stage ${stageNumber}: ${stageName}]</div>
+          <div>${escapeHtml(errorMsg)}</div>
+        </div>
+      </div>`;
+
+      // Clear downstream data so old output is NEVER kept!
+      if (stageNumber < 4) {
+        document.getElementById('tac-list').innerHTML = `<li class="text-slate-500 italic">Code generation blocked by error in Stage ${stageNumber}.</li>`;
+        document.getElementById('quad-table').innerHTML = `<tr><td colspan="5" class="py-3 text-center text-slate-400 italic">No quadruples generated due to compilation error.</td></tr>`;
+      }
+
+      // CRITICAL: UPDATE STAGE 5 (TERMINAL & MEMORY) WITH ERROR SCREEN
+      const vmBadge = document.getElementById('vm-halt-badge');
+      vmBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded bg-rose-900/60 text-rose-300 border border-rose-700";
+      vmBadge.textContent = "STATUS: COMPILATION FAILED";
+
+      const termScreen = document.getElementById('terminal-screen');
+      termScreen.innerHTML = `
+        <div class="text-rose-400 font-bold mb-2 pb-1 border-b border-rose-900/60 flex items-center justify-between">
+          <span>[!] COMPILATION ABORTED (NO BYTECODE EMITTED)</span>
+          <span class="text-slate-400 text-[11px]">Stage ${stageNumber} Failed</span>
+        </div>
+        <div class="text-slate-300 font-mono space-y-1">
+          <div class="text-slate-400">&gt; Source compilation halted due to an error in <strong class="text-rose-300">${stageName}</strong>:</div>
+          <div class="text-rose-400 bg-rose-950/60 border border-rose-900/80 p-2.5 rounded-lg my-2 font-mono">
+            <strong>Error:</strong> ${escapeHtml(errorMsg)}
+          </div>
+          <div class="text-slate-500 text-[11px] pt-1">
+            Execution stopped. Virtual Machine did not run because valid instructions were not produced. Fix the syntax/type error in the code editor to execute.
+          </div>
+        </div>
+      `;
+
+      // Clear memory cards
+      document.getElementById('memory-cards').innerHTML = `
+        <div class="col-span-full p-3 rounded-lg bg-rose-50/50 border border-rose-200 text-rose-700 text-xs">
+          <strong>Memory not initialized:</strong> Runtime storage frame was not allocated because execution was aborted at Stage ${stageNumber}.
+        </div>
+      `;
+
+      stageStatBadge.textContent = `Failed at Stage ${stageNumber}`;
+    }
+
+    // --- RENDER STAGE 1: LEXER ---
+    function renderLexer(tokens) {
+      let kw = 0, op = 0, id = 0, lit = 0;
+      let chipsHtml = '';
+      let tableHtml = '';
+
+      tokens.forEach((t, i) => {
+        let badgeColor = 'bg-slate-200 text-slate-700';
+        if (t.type === TokenType.KEYWORD) { kw++; badgeColor = 'bg-blue-100 text-blue-800 border-blue-200'; }
+        else if (t.type === TokenType.OPERATOR) { op++; badgeColor = 'bg-amber-100 text-amber-800 border-amber-200'; }
+        else if (t.type === TokenType.IDENTIFIER) { id++; badgeColor = 'bg-purple-100 text-purple-800 border-purple-200'; }
+        else if (t.type === TokenType.NUMBER || t.type === TokenType.STRING) { lit++; badgeColor = 'bg-emerald-100 text-emerald-800 border-emerald-200'; }
+
+        chipsHtml += `<span class="px-2 py-0.5 rounded border text-[11px] font-mono ${badgeColor}">${escapeHtml(t.lexeme)}</span>`;
+
+        tableHtml += `<tr class="hover:bg-slate-50">
+          <td class="py-1.5 px-3 text-slate-400">${i + 1}</td>
+          <td class="py-1.5 px-3 text-slate-600">${t.line}:${t.col}</td>
+          <td class="py-1.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${t.type}</span></td>
+          <td class="py-1.5 px-3 font-bold text-slate-900">${escapeHtml(t.lexeme)}</td>
+          <td class="py-1.5 px-3 text-slate-500">${t.desc}</td>
+        </tr>`;
+      });
+
+      document.getElementById('stat-kw').textContent = kw;
+      document.getElementById('stat-op').textContent = op;
+      document.getElementById('stat-id').textContent = id;
+      document.getElementById('stat-lit').textContent = lit;
+      document.getElementById('token-chips').innerHTML = chipsHtml;
+      document.getElementById('token-table').innerHTML = tableHtml;
+      stageStatBadge.textContent = `${tokens.length} Tokens Found`;
+    }
+
+    document.getElementById('token-search').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      let html = '';
+      lastTokens.forEach((t, i) => {
+        if (q && !t.lexeme.toLowerCase().includes(q) && !t.type.toLowerCase().includes(q)) return;
+        html += `<tr class="hover:bg-slate-50">
+          <td class="py-1.5 px-3 text-slate-400">${i + 1}</td>
+          <td class="py-1.5 px-3 text-slate-600">${t.line}:${t.col}</td>
+          <td class="py-1.5 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700">${t.type}</span></td>
+          <td class="py-1.5 px-3 font-bold text-slate-900">${escapeHtml(t.lexeme)}</td>
+          <td class="py-1.5 px-3 text-slate-500">${t.desc}</td>
+        </tr>`;
+      });
+      document.getElementById('token-table').innerHTML = html;
+    });
+
+    // --- RENDER STAGE 2: PARSER ---
+    function renderParser(ast) {
+      if (!ast) return;
+      document.getElementById('tree-container').innerHTML = buildTree(ast);
+      document.getElementById('json-pre').textContent = JSON.stringify(ast, null, 2);
+    }
+
+    function renderParserError(msg) {
+      document.getElementById('tree-container').innerHTML = `
+        <div class="p-3 rounded-lg bg-rose-950/80 border border-rose-800 text-rose-300">
+          <strong>Syntax Error:</strong> Parse tree could not be generated.
+          <div class="text-xs text-rose-400 mt-1">${escapeHtml(msg)}</div>
+        </div>
+      `;
+      document.getElementById('json-pre').textContent = `{
+  "error": "${msg}"
+}`;
+    }
+
+    function buildTree(node, depth = 0) {
+      if (!node) return '';
+      const indent = depth * 18;
+      let label = `<span class="text-blue-400 font-bold">${node.type}</span>`;
+      let detail = '';
+
+      if (node.type === 'VarDecl') detail = `(${node.varType} <strong>${node.name}</strong>)`;
+      else if (node.type === 'Assignment') detail = `(Assign to <strong>${node.name}</strong>)`;
+      else if (node.type === 'PrintStatement') detail = `(Print to Console)`;
+      else if (node.type === 'IfStatement') detail = `(examine condition)`;
+      else if (node.type === 'WhileStatement') detail = `(noose loop)`;
+      else if (node.type === 'BinaryOp') detail = `[Operator: <span class="text-amber-400">${node.op}</span>]`;
+      else if (node.type === 'Literal') detail = `[Value: <span class="text-emerald-400">${escapeHtml(String(node.raw))}</span>]`;
+      else if (node.type === 'Identifier') detail = `[Var: <span class="text-purple-400">${node.name}</span>]`;
+
+      let h = `<div style="margin-left:${indent}px" class="py-1 px-2 rounded hover:bg-slate-800 transition flex items-center gap-2">
+        <span class="text-slate-600">└─</span> ${label} <span class="text-slate-400 text-[11px]">${detail}</span>
+      </div>`;
+
+      if (node.statements) node.statements.forEach(s => h += buildTree(s, depth + 1));
+      if (node.initExpr) h += buildTree(node.initExpr, depth + 1);
+      if (node.expr) h += buildTree(node.expr, depth + 1);
+      if (node.condition) h += buildTree(node.condition, depth + 1);
+      if (node.thenBranch) h += buildTree(node.thenBranch, depth + 1);
+      if (node.elseBranch) h += buildTree(node.elseBranch, depth + 1);
+      if (node.body) h += buildTree(node.body, depth + 1);
+      if (node.left) h += buildTree(node.left, depth + 1);
+      if (node.right) h += buildTree(node.right, depth + 1);
+      return h;
+    }
+
+    const btnTreeVisual = document.getElementById('btn-tree-visual');
+    const btnTreeJson = document.getElementById('btn-tree-json');
+    const treeContainer = document.getElementById('tree-container');
+    const jsonContainer = document.getElementById('json-container');
+
+    btnTreeVisual.addEventListener('click', () => {
+      btnTreeVisual.className = "px-3 py-1 rounded bg-blue-600 text-white font-medium text-xs";
+      btnTreeJson.className = "px-3 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100";
+      treeContainer.classList.remove('hidden');
+      jsonContainer.classList.add('hidden');
+    });
+
+    btnTreeJson.addEventListener('click', () => {
+      btnTreeJson.className = "px-3 py-1 rounded bg-blue-600 text-white font-medium text-xs";
+      btnTreeVisual.className = "px-3 py-1 rounded bg-white border border-slate-200 text-slate-700 font-medium text-xs hover:bg-slate-100";
+      treeContainer.classList.add('hidden');
+      jsonContainer.classList.remove('hidden');
+    });
+
+    // --- RENDER STAGE 3: SEMANTIC ---
+    function renderSemantic(res) {
+      document.getElementById('check-declared-card').className = "p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5";
+      document.getElementById('check-declared-icon').textContent = "✓";
+      document.getElementById('check-declared-icon').className = "text-emerald-600 font-bold text-sm";
+      document.getElementById('check-declared-desc').textContent = "All referenced variables exist in scope.";
+
+      document.getElementById('check-types-card').className = "p-3 bg-emerald-50 border border-emerald-200 rounded-xl flex items-start gap-2.5";
+      document.getElementById('check-types-icon').textContent = "✓";
+      document.getElementById('check-types-icon').className = "text-emerald-600 font-bold text-sm";
+      document.getElementById('check-types-desc').textContent = "Values match variable types (INT, STRING, BOOL).";
+
+      let h = '';
+      if (res.symbols.length === 0) {
+        h = '<tr><td colspan="5" class="py-2.5 px-3 text-slate-400 italic text-center">No variables declared</td></tr>';
+      } else {
+        res.symbols.forEach(s => {
+          let badge = 'bg-blue-50 text-blue-700 border-blue-200';
+          if (s.type === 'STRING') badge = 'bg-purple-50 text-purple-700 border-purple-200';
+          if (s.type === 'BOOL') badge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+
+          h += `<tr>
+            <td class="py-2 px-3 font-bold text-slate-900">${s.name}</td>
+            <td class="py-2 px-3"><span class="px-2 py-0.5 rounded border text-[10px] font-bold ${badge}">${s.type}</span></td>
+            <td class="py-2 px-3 text-slate-600">Global Scope</td>
+            <td class="py-2 px-3 text-slate-500">Line ${s.line}</td>
+            <td class="py-2 px-3 text-slate-700 font-semibold" id="sym-val-${s.name}">-</td>
+          </tr>`;
+        });
+      }
+      document.getElementById('symbol-table').innerHTML = h;
+    }
+
+    function renderSemanticError(errMsg) {
+      const isUndeclared = errMsg.includes("declaration") || errMsg.includes("Undeclared");
+      if (isUndeclared) {
+        document.getElementById('check-declared-card').className = "p-3 bg-rose-50 border border-rose-300 rounded-xl flex items-start gap-2.5";
+        document.getElementById('check-declared-icon').textContent = "✕";
+        document.getElementById('check-declared-icon').className = "text-rose-600 font-bold text-sm";
+        document.getElementById('check-declared-desc').textContent = errMsg;
+      } else {
+        document.getElementById('check-types-card').className = "p-3 bg-rose-50 border border-rose-300 rounded-xl flex items-start gap-2.5";
+        document.getElementById('check-types-icon').textContent = "✕";
+        document.getElementById('check-types-icon').className = "text-rose-600 font-bold text-sm";
+        document.getElementById('check-types-desc').textContent = errMsg;
+      }
+    }
+
+    // --- RENDER STAGE 4: ICG ---
+    function renderICG(res) {
+      let tacH = '';
+      res.tac.forEach(t => {
+        tacH += `<li class="py-0.5">${escapeHtml(t)}</li>`;
+      });
+      document.getElementById('tac-list').innerHTML = tacH || '<li>No code</li>';
+
+      let qH = '';
+      res.quads.forEach(q => {
+        let opClass = 'font-bold text-slate-800';
+        if (q.op === 'ASSIGN') opClass = 'font-bold text-blue-600';
+        else if (['+', '-', '*', '/'].includes(q.op)) opClass = 'font-bold text-emerald-600';
+        else if (['>', '<', '>='].includes(q.op)) opClass = 'font-bold text-amber-600';
+
+        qH += `<tr>
+          <td class="py-1.5 px-2.5 text-slate-400">${q.idx}</td>
+          <td class="py-1.5 px-2.5 ${opClass}">${q.op}</td>
+          <td class="py-1.5 px-2.5 text-slate-700">${escapeHtml(String(q.a1))}</td>
+          <td class="py-1.5 px-2.5 text-slate-700">${escapeHtml(String(q.a2))}</td>
+          <td class="py-1.5 px-2.5 font-bold text-slate-900">${escapeHtml(String(q.res))}</td>
+        </tr>`;
+      });
+      document.getElementById('quad-table').innerHTML = qH;
+    }
+
+    // --- RENDER STAGE 5: VM & OUTPUT (SUCCESS) ---
+    function renderVM(res) {
+      const vmBadge = document.getElementById('vm-halt-badge');
+      vmBadge.className = "text-[11px] font-mono px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700";
+      vmBadge.textContent = "STATUS: HALTED (CLEAN)";
+
+      let screenH = '';
+      if (res.output.length === 0) {
+        screenH = '<div class="text-slate-500 italic">[No Turnout statements executed]</div>';
+      } else {
+        res.output.forEach(line => {
+          screenH += `<div class="text-emerald-400 font-semibold flex items-center gap-1.5"><span class="text-slate-500">&gt;</span> ${escapeHtml(line)}</div>`;
+        });
+      }
+      screenH += `<div class="text-slate-500 text-[11px] pt-3">[Program completed execution]</div>`;
+      document.getElementById('terminal-screen').innerHTML = screenH;
+
+      let memH = '';
+      const keys = Object.keys(res.mem);
+      if (keys.length === 0) {
+        memH = '<div class="text-slate-400 italic">No variables in memory</div>';
+      } else {
+        keys.forEach(k => {
+          const v = res.mem[k];
+          const isTemp = k.startsWith('t') && !isNaN(k.slice(1));
+          if (!isTemp) {
+            const symEl = document.getElementById(`sym-val-${k}`);
+            if (symEl) symEl.textContent = JSON.stringify(v);
+          }
+          memH += `<div class="p-2.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between">
+            <span class="${isTemp ? 'text-slate-400' : 'text-slate-900 font-bold'}">${k}</span>
+            <span class="text-blue-600 font-semibold">${escapeHtml(JSON.stringify(v))}</span>
+          </div>`;
+        });
+      }
+      document.getElementById('memory-cards').innerHTML = memH;
+      stageStatBadge.textContent = `Completed (${res.output.length} outputs)`;
+    }
+
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    window.onload = () => {
+      editor.value = SAMPLES.lab02;
+      syncLines();
+      compileCode();
+      setStage(5);
+    };
+  </script>
+</body>
+</html>

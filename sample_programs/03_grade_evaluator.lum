@@ -1,0 +1,12 @@
+# If / Else Branching with 'otherwise'
+Bindint mark := 85
+Bindstrng grade := "Pending"
+
+examine mark >=; 80 {
+  grade := "Distinction"
+  Turnout grade
+} otherwise {
+  grade := "Pass"
+  Turnout grade
+}
+halt

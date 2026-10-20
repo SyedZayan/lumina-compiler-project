@@ -1,0 +1,52 @@
+(* ========================================================
+   LUMINA PROGRAMMING LANGUAGE - FORMAL GRAMMAR (EBNF)
+   Compiler Construction Term Project - Fall 2024
+   ======================================================== *)
+
+<Program>          ::= <StatementList> <EOF>
+
+<StatementList>    ::= <Statement>*
+
+<Statement>        ::= <VarDeclStmt>
+                     | <AssignStmt>
+                     | <PrintStmt>
+                     | <IfStmt>
+                     | <WhileStmt>
+                     | <HaltStmt>
+                     | <BlockStmt>
+
+<VarDeclStmt>      ::= ( "Bindint" | "Bindstrng" | "Bindbool" ) <Identifier> ":=" <Expression>
+
+<AssignStmt>       ::= <Identifier> ":=" <Expression>
+
+<PrintStmt>        ::= "Turnout" <Expression>
+
+<IfStmt>           ::= "examine" <Condition> <Statement> [ "otherwise" <Statement> ]
+
+<WhileStmt>        ::= "noose" <Condition> <Statement>
+
+<Condition>        ::= <Expression>
+
+<BlockStmt>        ::= "{" <StatementList> "}"
+
+<HaltStmt>         ::= "halt"
+
+<Expression>       ::= <RelationalExpr>
+
+<RelationalExpr>   ::= <AdditiveExpr> [ ( ">>" | "<<" | ">=;" ) <AdditiveExpr> ]
+
+<AdditiveExpr>     ::= <MultiplicativeExpr> ( ( "++>" | "<--" ) <MultiplicativeExpr> )*
+
+<MultiplicativeExpr>::= <PrimaryExpr> ( ( "***" | "://" ) <PrimaryExpr> )*
+
+<PrimaryExpr>      ::= <NUMBER>
+                     | <STRING>
+                     | "True"
+                     | "False"
+                     | <Identifier>
+                     | "(" <Expression> ")"
+
+(* Token Regular Expressions (from Lab 02) *)
+<Identifier>       ::= [A-Za-z_][A-Za-z0-9_]*
+<NUMBER>           ::= [0-9]+ ("." [0-9]+)?
+<STRING>           ::= '"' [^"\\]* '"'

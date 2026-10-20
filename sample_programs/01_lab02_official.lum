@@ -1,0 +1,7 @@
+# Official Lab 02 Benchmark
+Bindint score := 100
+Bindstrng status := "Passed"
+Bindbool isWinner := True
+examine score >> 50
+  Turnout status
+halt

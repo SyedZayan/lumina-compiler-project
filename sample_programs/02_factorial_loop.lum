@@ -1,0 +1,10 @@
+# Loop Accumulator
+Bindint count := 1
+Bindint total := 0
+noose count << 5 {
+  total := total ++> count
+  Turnout total
+  count := count ++> 1
+}
+Turnout "Accumulation Complete!"
+halt

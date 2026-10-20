@@ -1,0 +1,5 @@
+# Semantic Type Mismatch Demo
+Bindint score := "One Hundred"
+score := True
+Turnout score
+halt
